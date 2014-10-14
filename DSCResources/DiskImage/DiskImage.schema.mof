@@ -1,0 +1,12 @@
+[ClassVersion("1.0"), FriendlyName("DiskImage")]
+
+class DiskImage : OMI_BaseResource 
+{
+
+	[Key] string ImagePath;
+
+	[Key] string DriveLetter;
+
+	[write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
+
+};
