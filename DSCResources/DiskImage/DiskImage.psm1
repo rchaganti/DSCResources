@@ -82,8 +82,10 @@ Function Test-TargetResource {
     $DiskImage = Get-DiskImage -ImagePath $ImagePath -ErrorAction Stop
     if ($DiskImage.Attached) {
         if (($DiskImage | Get-Volume).DriveLetter -eq $DriveLetter) {
+            Write-Verbose 'Disk image is mounted with the same drive letter'
             $MountExists = $true
         } else {
+            Write-Verbose 'Disk image is mounted but with a different drive letter. Drive letter will be changed'
             $MountExists = $false
         }
     }
