@@ -1,0 +1,10 @@
+[ClassVersion("1.0"), FriendlyName("WMILogFileConsumer")]
+class WMILogFileConsumer : OMI_BaseResource 
+{
+	[Key] string Name;
+	[Required] string Filename;
+    	[Required] string Text;
+	[write] uint64 MaximumFileSize;
+	[write] boolean IsUnicode;
+	[write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
+};

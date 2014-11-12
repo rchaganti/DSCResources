@@ -1,0 +1,11 @@
+[ClassVersion("1.0"), FriendlyName("WMIEventBinding")]
+class WMIEventBinding : OMI_BaseResource 
+{
+	[Key] string Filter;
+	[Key] string Consumer;
+	[Write] Boolean SlowDownProviders;
+	[Write] Boolean MaintainSecurityContext;
+	[Write] uint32 DeliveryQoS;
+	[Required, ValueMap{"LogFile", "EventLog","CommandLine","Script","SMTP"},Values{"LogFile", "EventLog","CommandLine","Script","SMTP"}] string ConsumerType;
+	[write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
+};

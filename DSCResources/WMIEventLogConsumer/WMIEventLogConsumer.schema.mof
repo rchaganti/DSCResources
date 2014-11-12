@@ -1,0 +1,13 @@
+[ClassVersion("1.0"), FriendlyName("WMIEventLogConsumer")]
+class WMIEventLogConsumer : OMI_BaseResource
+{
+	[Key] string Name;
+	[Write] uint16 Category;
+	[Required] uint32 EventID;
+	[Write, ValueMap{"Success","Error","Warning","Information","AuditSuccess","AuditFailure"}, Values{"Success","Error","Warning","Information","AuditSuccess","AuditFailure"}] string EventType;
+	[Write] uint32 NumberOfInsertionStrings;
+	[Write] string SourceName;
+	[Write] string UNCServerName;
+	[Write] string InsertionStringTemplates[];
+	[Write, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
+};

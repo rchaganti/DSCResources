@@ -1,0 +1,14 @@
+[ClassVersion("1.0"), FriendlyName("WMISMTPConsumer")]
+class WMISMTPConsumer : OMI_BaseResource 
+{
+	[Key] string Name;
+	[Required] string ToLine;
+    	[Required] string FromLine;
+    	[Required] string SMTPServer;
+    	[Write] string Message;
+    	[Write] string Subject;
+    	[Write] string CcLine;
+    	[Write] string BccLine;
+    	[Write] string ReplyToLine;
+	[write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
+};
