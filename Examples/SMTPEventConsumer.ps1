@@ -1,10 +1,10 @@
 ﻿Configuration PermEventDemo3 {
-    Import-DscResource -Module WMIPermanentEvents
+    Import-DscResource -Module PSMag
     Node Localhost {
         WMIEventFilter ProcessEventFilter {
             Name = 'ProcessEventFilter'
             Query = "SELECT * FROM __InstanceCreationEvent WITHIN 5 WHERE TargetInstance ISA 'Win32_Process'"
-            Ensure = 'Absent'
+            Ensure = 'Present'
         }
 
         WMISMTPConsumer ProcessSMTPConsumer {
@@ -12,15 +12,15 @@
             Message = 'New Process Created with name %TargetInstance.Name%'
             Subject = 'new Process Created'
             SMTPServer = 'smtp.google.com'
-            ToLine = 'Ravikanth@Ravichaganti.com'
-            FromLine = 'Ravikanth_Chaganti@Dell.com'
-            Ensure = 'Absent'
+            ToLine = 'ToUser@SomeDomain.com'
+            FromLine = 'FromUser@AnotherDomain.com'
+            Ensure = 'Present'
         }
 
         WMIEventBinding ProcessEventLogBinder {
             Filter = 'ProcessEventFilter'
             Consumer = 'ProcessSMTP'
-            Ensure = 'Absent'
+            Ensure = 'Present'
             ConsumerType = 'SMTP'
             DependsOn = '[WMIEventFilter]ProcessEventFilter','[WMISMTPConsumer]ProcessSMTPConsumer'
         }
