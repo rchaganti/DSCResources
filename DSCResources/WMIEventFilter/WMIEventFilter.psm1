@@ -1,4 +1,28 @@
-﻿function Get-TargetResource
+﻿# Fallback message strings in en-US
+DATA localizedData
+{
+# same as culture = "en-US"
+ConvertFrom-StringData @'    
+    GettingFilterInstance=Getting Filter Instance named {0}.
+    FilterInstanceFound=Filter Instance named {0} is found.
+    FilterInstanceNotFound=Filter Instance named {0} not found.
+    CreatingEventFilter=Creating Filter Instance named {0} with query {1}.
+    CreatedEventFilter=Created Filter Instance named {0}.
+    RemovingEventFilter=Removing Filter Instance named {0}.
+    RemovedEventFilter=Removed Filter Instance named {0}.
+    FilterInstanceFoundNoAction=Filter Instance named {0} already exists. No action needed.
+    FilterInstanceNotFoundShouldCreate=Filter Instance named {0} does not exist. It will be created.
+    FilterInstanceFoundShouldDelete=Filter Instance named {0} exists. This will be removed.
+    FilterInstanceNotFoundNoAction=Filter Instance named {0} not found. No action needed.
+'@
+}
+
+if (Test-Path $PSScriptRoot\en-us)
+{
+    Import-LocalizedData LocalizedData -filename WMIEventFilter.psd1
+}
+
+function Get-TargetResource
 {
     [CmdletBinding()]
     [OutputType([Hashtable])]
@@ -18,11 +42,14 @@
         EventNamespace = $EventNamespace
     }
 
+    Write-Verbose ($localizedData.GettingFilterInstance -f $Name)
     $EventFilter = Get-CimInstance -Namespace 'root\subscription' -Class __EventFilter -Filter "Name='$Name'"
     if ($EventFilter) {
+        Write-Verbose ($localizedData.FilterInstanceFound -f $Name)
         $Configuration.Add('Ensure','Present')
         $Configuration.Add('Query',$EventFilter.Query)
     } else {
+        Write-Verbose ($localizedData.FilterInstanceNotFound -f $Name)
         $Configuration.Add('Ensure','Absent')
     }
 
@@ -49,16 +76,18 @@ function Set-TargetResource
     )
 
     if ($Ensure -eq 'Present') {
-        Write-Verbose "Creating a new event filter named ${Name} in the root\subscription with ${query}"
+        Write-Verbose ($localizedData.CreatingEventFilter -f $Name, $Query)
         New-CimInstance -ClassName '__EventFilter' -Namespace 'root\subscription' -Property @{
             Name = $Name
             EventNamespace = $EventNamespace
             Query = $Query
             QueryLanguage = 'WQL'
         }
+        Write-Verbose ($localizedData.CreatedEventFilter -f $Name)
     } else {
-        Write-Verbose "Removing Event filter named ${Name} from the namespace root\subscription"
+        Write-Verbose ($localizedData.RemovingEventFilter -f $Name)
         Remove-CimInstance -Namespace 'root\subscription' -Query "Select * FROM __EventFilter WHERE Name='${Name}'"
+        Write-Verbose ($localizedData.RemovedEventFilter -f $Name)
     }
 }
 
@@ -82,22 +111,23 @@ function Test-TargetResource
         $Ensure = 'Present'
     )
 
+    Write-Verbose ($localizedData.GettingFilterInstance -f $Name)
     $EventFilter = Get-CimInstance -Namespace 'root\subscription' -Class __EventFilter -Filter "Name='$Name'"
 
     if ($Ensure -eq 'Present') {
         if ($EventFilter) {
-            Write-Verbose "Event filter with name ${Name} in the namespace root\subscription already exists. No action needed"
+            Write-Verbose ($localizedData.FilterInstanceFoundNoAction -f $Name)
             return $true
         } else {
-            Write-Verbose "Event filter with name ${Name} in the namespace root\subscription does not exist. It will be created"
+            Write-Verbose ($localizedData.FilterInstanceNotFoundShouldCreate -f $Name)
             return $false
         }
     } else {
         if ($EventFilter) {
-            Write-Verbose "Event filter with name ${Name} in the namespace root\subscription exists. It will be removed"
+            Write-Verbose ($localizedData.FilterInstanceFoundShouldDelete -f $Name)
             return $false
         } else {
-            Write-Verbose "Event filter with name ${Name} in the namespace root\subscription does not exist. No action needed"
+            Write-Verbose ($localizedData.FilterInstanceNotFoundNoAction -f $Name)
             return $true
         }
     }

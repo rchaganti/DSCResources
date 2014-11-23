@@ -1,4 +1,29 @@
-﻿function Get-TargetResource
+﻿# Fallback message strings in en-US
+DATA localizedData
+{
+# same as culture = "en-US"
+ConvertFrom-StringData @'    
+    GettingConsumerInstance=Getting Consumer Instance named {0}.
+    ConsumerInstanceFound=Consumer Instance named {0} is found.
+    ConsumerInstanceNotFound=Getting Consumer Instance named {0} not found.
+    CreatingConsumerInstance=Creating Consumer Instance named {0}.
+    NotAbsolutePath=ExecutablePath value {0} provided is not absolte path.
+    CreatedConsumerInstance=Created Consumer Instance named {0}.
+    RemovingConsumerInstance=Removing Consumer Instance named {0}.
+    RemovedConsumerInstance=Removed Consumer Instance named {0}.
+    ConsumerExistsNoAction=Consumer Instance named {0} already exists. No action needed.
+    ConsumerDoesNotExistShouldCreate=Consumer Instance named {0} does not exist. It will be created.
+    ConsumerExistsShouldRemove=Consumer Instance named {0} exists. This will be removed.
+    ConsumerDoesNotExistNoAction=Consumer Instance named {0} not found. No action needed.
+'@
+}
+
+if (Test-Path $PSScriptRoot\en-us)
+{
+    Import-LocalizedData LocalizedData -filename WMICommandLineConsumer.psd1
+}
+
+function Get-TargetResource
 {
     [CmdletBinding()]
     [OutputType([Hashtable])]
@@ -20,13 +45,17 @@
         Name = $Name
         CommandLineTemplate = $CommandLineTemplate
     }
-
+    
+    Write-Verbose ($localizedData.GettingConsumerInstance -f $Name)
     $ScriptConsumer = Get-CimInstance -Namespace 'root\subscription' -Query "SELECT * FROM CommandLineEventConsumer  WHERE Name='$Name'"
+    
     if ($ScriptConsumer) {
+        Write-Verbose ($localizedData.ConsumerInstanceFound -f $Name)
         $Configuration.Add('Ensure','Present')
         $Configuration.Add('ExecutablePath',$CommandLineEventConsumer.ExecutablePath)
         $Configuration.Add('WorkingDirectory',$CommandLineEventConsumer.WorkingDirectory)
     } else {
+        Write-Verbose ($localizedData.ConsumerInstanceNotFound -f $Name)
         $Configuration.Add('Ensure','Absent')
     }
 
@@ -56,8 +85,7 @@ function Set-TargetResource
     )
 
     if ($Ensure -eq 'Present') {
-        Write-Verbose "Creating a new commandline Consumer instance with name ${Name}"
-        
+        Write-Verbose ($localizedData.CreatingConsumerInstance -f $Name)
         
         $Properties = @{
             Name = $Name
@@ -66,7 +94,7 @@ function Set-TargetResource
 
         if ($ExecutablePath) {
             if (-not [System.IO.Path]::IsPathRooted($ExecutablePath)) {
-                Throw "${ExecutablePath} is relative and cannot be processed"
+                Throw ($localizedData.NotAbsolutePath -f $ExecutablePath)
             } else {
                 $Properties.Add('ExecutablePath', $ExecutablePath)
             }
@@ -77,9 +105,11 @@ function Set-TargetResource
         }
 
         New-CimInstance -Namespace 'root\subscription' -ClassName 'CommandLineEventConsumer' -Property $Properties
+        Write-Verbose ($localizedData.CreatedConsumerInstance -f $Name)
     } else {
-        Write-Verbose "Removing an Active Script Consumer instance with name ${Name}"
+        Write-Verbose ($localizedData.RemovingConsumerInstance -f $Name)
         Remove-CimInstance -Namespace 'root\subscription' -Query "SELECT * FROM CommandLineEventConsumer WHERE Name='$Name'"
+        Write-Verbose ($localizedData.RemovedConsumerInstance -f $Name)
     }
 }
 
@@ -106,22 +136,23 @@ function Test-TargetResource
         $Ensure = 'Present'
     )
 
+    Write-Verbose ($localizedData.GettingConsumerInstance -f $Name)
     $CommandLineEventConsumer = Get-CimInstance -Namespace 'root\subscription' -Query "SELECT * FROM CommandLineEventConsumer WHERE Name='$Name'"
     
     if ($Ensure -eq 'Present') {
         if ($CommandLineEventConsumer) {
-            Write-Verbose "Active Script consumer with the name ${Name} already exists. No action needed"
+            Write-Verbose ($localizedData.ConsumerExistsNoAction -f $Name)
             return $true
         } else {
-            Write-Verbose "Active Script consumer with the name ${Name} does not exist. It will be created"
+            Write-Verbose ($localizedData.ConsumerDoesNotExistShouldCreate -f $Name)
             return $false
         }
     } else {
         if ($CommandLineEventConsumer) {
-            Write-Verbose "Active Script consumer with the name ${Name} already exists. It will be removed"
+            Write-Verbose ($localizedData.ConsumerExistsShouldRemove -f $Name)
             return $false
         } else {
-            Write-Verbose "Active Script consumer with the name ${Name} does not exist. No action needed"
+            Write-Verbose ($localizedData.ConsumerDoesNotExistNoAction -f $Name)
             return $true
         }
     }

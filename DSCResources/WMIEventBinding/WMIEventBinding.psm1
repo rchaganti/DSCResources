@@ -1,4 +1,30 @@
-﻿$ConsumerHash = @{
+﻿# Fallback message strings in en-US
+DATA localizedData
+{
+# same as culture = "en-US"
+ConvertFrom-StringData @'    
+    GettingFilterToConsumerBinding="Retreiving any avilable bindings for {0} and {1} of type {2}".
+    BindingFound="Binding found for filter {0}, consumer {1} of type {2}".
+    BindingNotFound="Binding found for filter {0}, consumer {1} of type {2}".
+    GettingFilterAndConsumer="Retrieving Filter and Consumer instances for {0} and {1}".
+    FilterAndConsumerCannotBeCreated="Filter and Consumer instances cannot be created for filter {0} and consumer {1}".
+    CreatingFilterToConsumerBinding="Creating event binding for filter {0} and consumer {1} of type {2}".
+    CreatedEventBinding="Created event binding for filter {0} and consumer {1} of type {2}".
+    RemovingEventBinding="Removing event binding for filter {0} and consumer {1} of type {2}".
+    RemovedEventBinding="Removed event binding for filter {0} and consumer {1} of type {2}".
+    EventBindingExistsNoAction="Event binding for filter {0} and consumer {1} of type {2} exists. No action needed.".
+    EventBindingDoesNotExistShouldCreate="Event binding for filter {0} and consumer {1} of type {2} does not exist. It will be created".
+    EventBindingExistsShouldDelete="Event binding for filter {0} and consumer {1} of type {2} exits. It should be deleted".
+    EventBindingDoesNotExistNoAction="Event binding for filter {0} and consumer {1} of type {2} does not exist. No action needed".
+'@
+}
+
+if (Test-Path $PSScriptRoot\en-us)
+{
+    Import-LocalizedData LocalizedData -filename WMIEventBinding.psd1
+}
+
+$ConsumerHash = @{
     LogFile = 'LogFileEventConsumer'
     EventLog = 'NTEventLogEventConsumer'
     CommandLine = 'CommandLineEventConsumer'
@@ -32,15 +58,15 @@ function Get-TargetResource
         Consumer = $Consumer
     }    
 
-    Write-Verbose "Retreiving any avilable bindings for ${filter} and ${consumer} of type ${ConsumerType}"
+    Write-Verbose ($localizedData.GettingFilterToConsumerBinding -f $Filter, $Consumer, $ConsumerType)
     $Binding = Get-CimInstance -Namespace 'root\subscription' -ClassName __FilterToConsumerBinding | Where-Object { ($_.Filter.Name -eq $Filter) -and ($_.Consumer.Name -eq $Consumer) }
 
     if ($Binding) {
-        Write-Verbose "Filter to Consumer binding for ${filter} and ${Consumer} of type ${ConsumerType} exists"
+        Write-Verbose ($localizedData.BindingFound -f $Filter, $Consumer, $ConsumerType)
         $Configuration.Add('ConsumerType',$Binding.Consumer.CimClass.CimClassName)
         $Configuration.Add('Ensure','Present')
     } else {
-        Write-Verbose "Filter to Consumer binding for ${filter} and ${Consumer} of type ${ConsumerType} does not exist"
+        Write-Verbose ($localizedData.BindingNotFound -f $Filter, $Consumer, $ConsumerType)
         $Configuration.Add('Ensure','Absent')
     }
 
@@ -77,14 +103,14 @@ function Set-TargetResource
     )
 
     if ($Ensure -eq 'Present') {
-        Write-Verbose "Retreiving filter and consumer objects ..."
+        Write-Verbose ($localizedData.GettingFilterAndConsumer -f $Filter, $Consumer)
 
         try {
             $FilterObject = Get-CimInstance -ClassName '__EventFilter' -Namespace 'root\subscription' -Filter "Name='${filter}'"
             $ConsumerObject = Get-CimInstance -ClassName $ConsumerHash[$ConsumerType] -Namespace 'root\subscription' -Filter "Name='${Consumer}'"
         }
         catch {
-            throw "Filter and Consumer objects could not be created"
+            throw ($localizedData.FilterAndConsumerCannotBeCreated -f $Filter, $Consumer, $ConsumerType)
         }
         
         $BinderHash = @{
@@ -98,12 +124,14 @@ function Set-TargetResource
             $BinderHash.Add('DeliveryQoS', [uint32]($DeliveryQoSHash[$DeliveryQoS]))
         }
 
-        Write-Verbose "Creating a ${filter} to ${consumer} binding ..."
+        Write-Verbose ($localizedData.CreatingFilterToConsumerBinding -f $Filter, $Consumer, $ConsumerType)
         New-CimInstance -ClassName '__FilterToConsumerBinding' -Namespace 'root\subscription' -Property $BinderHash
+        Write-Verbose ($localizedData.CreatedEventBinding -f $Filter, $Consumer, $ConsumerType)
     } else {
+        Write-Verbose ($localizedData.RemovingEventBinding -f $Filter, $Consumer, $ConsumerType)
         $binding = Get-CimInstance -Namespace 'root\subscription' -ClassName __FilterToConsumerBinding | Where-Object { ($_.Filter.Name -eq $Filter) -and ($_.Consumer.Name -eq $Consumer) }
-        Write-Verbose "Remove filter ${filter} to consumer ${consumer} binding ..."
         Remove-CimInstance -InputObject $binding
+        Write-Verbose ($localizedData.RemovedEventBinding -f $Filter, $Consumer, $ConsumerType)
     }
 }
 
@@ -137,23 +165,23 @@ function Test-TargetResource
         [String] $Ensure = 'Present'
     )
     
-    Write-Verbose "Retreiving any avilable bindings for ${filter} and ${consumer} of type ${ConsumerType}"
+    Write-Verbose ($localizedData.GettingFilterToConsumerBinding -f $Filter, $Consumer, $ConsumerType)
     $binding = Get-CimInstance -Namespace 'root\subscription' -ClassName __FilterToConsumerBinding | Where-Object { ($_.Filter.Name -eq $Filter) -and ($_.Consumer.Name -eq $Consumer) }
 
     if ($Ensure -eq 'Present') {
         if ($binding) {
-            Write-Verbose "${Filter} to ${Consumer} binder exists already. No action needed"
+            Write-Verbose ($localizedData.EventBindingExistsNoAction -f $Filter, $Consumer, $ConsumerType)
             return $true
         } else {
-            Write-Verbose "${Filter} to ${Consumer} binder does not exist. It will be created"
+            Write-Verbose ($localizedData.EventBindingDoesNotExistShouldCreate -f $Filter, $Consumer, $ConsumerType)
             return $false
         }
     } else {
         if ($binding) {
-            Write-Verbose "${Filter} to ${Consumer} binder exists already. It will be removed"
+            Write-Verbose ($localizedData.EventBindingExistsShouldDelete -f $Filter, $Consumer, $ConsumerType)
             return $false
         } else {
-            Write-Verbose "${Filter} to ${Consumer} binder does not exist. No action needed"
+            Write-Verbose ($localizedData.EventBindingDoesNotExistNoAction -f $Filter, $Consumer, $ConsumerType)
             return $true
         }
     }

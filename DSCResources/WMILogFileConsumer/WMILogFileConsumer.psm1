@@ -1,4 +1,29 @@
-﻿function Get-TargetResource
+﻿# Fallback message strings in en-US
+DATA localizedData
+{
+# same as culture = "en-US"
+ConvertFrom-StringData @'    
+    GettingConsumerInstance=Getting Consumer Instance named {0}.
+    ConsumerInstanceFound=Consumer Instance named {0} is found.
+    ConsumerInstanceNotFound=Getting Consumer Instance named {0} not found.
+    CreatingConsumerInstance=Creating Consumer Instance named {0}.
+    NotAbsolutePath=FileName value {0} provided is not absolte path. It will be converted to absolutepath.
+    CreatedConsumerInstance=Created Consumer Instance named {0}.
+    RemovingConsumerInstance=Removing Consumer Instance named {0}.
+    RemovedConsumerInstance=Removed Consumer Instance named {0}.
+    ConsumerExistsNoAction=Consumer Instance named {0} already exists. No action needed.
+    ConsumerDoesNotExistShouldCreate=Consumer Instance named {0} does not exist. It will be created.
+    ConsumerExistsShouldRemove=Consumer Instance named {0} exists. This will be removed.
+    ConsumerDoesNotExistNoAction=Consumer Instance named {0} not found. No action needed.
+'@
+}
+
+if (Test-Path $PSScriptRoot\en-us)
+{
+    Import-LocalizedData LocalizedData -filename WMILogFileConsumer.psd1
+}
+
+function Get-TargetResource
 {
     [CmdletBinding()]
     [OutputType([Hashtable])]
@@ -18,13 +43,17 @@
         Filename = $Filename
         Text = $Text
     }
-
+    
+    Write-Verbose ($localizedData.GettingConsumerInstance -f $Name)
     $LogFileConsumer = Get-CimInstance -Namespace 'root\subscription' -Query "SELECT * FROM LogFileEventConsumer WHERE Name='$Name'"
+
     if ($LogFileConsumer) {
+        Write-Verbose ($localizedData.ConsumerInstanceFound -f $Name)
         $Configuration.Add('Ensure','Present')
         $Configuration.Add('MaximumFileSize',$LogFileConsumer.MaximumFileSize)
         $Configuration.Add('IsUnicode',$LogFileConsumer.IsUnicode)
     } else {
+        Write-Verbose ($localizedData.ConsumerInstanceNotFound -f $Name)
         $Configuration.Add('Ensure','Absent')
     }
 
@@ -57,11 +86,11 @@ function Set-TargetResource
     )
 
     if ($Ensure -eq 'Present') {
-        Write-Verbose "Creating a new LogFile Consumer instance with name ${Name}"
+        Write-Verbose ($localizedData.CreatingConsumerInstance -f $Name)
         
         if (-not [System.IO.Path]::IsPathRooted($Filename)) {
             $Filename = [System.IO.Path]::GetFullPath($Filename)
-            Write-Verbose "Found a relative path for the filename. The converted full path is ${FileName}"
+            Write-Verbose ($localizedData.NotAbsolutePath -f $Filename)
         }
         
         New-CimInstance -Namespace 'root\subscription' -ClassName 'LogFileEventConsumer' -Property @{
@@ -71,9 +100,11 @@ function Set-TargetResource
             MaximumFileSize = $MaximumFileSize
             IsUnicode = $IsUnicode
         }
+        Write-Verbose ($localizedData.CreatedConsumerInstance -f $Name)
     } else {
-        Write-Verbose "Removing a LogFile Consumer instance with name ${Name}"
+        Write-Verbose ($localizedData.RemovingConsumerInstance -f $Name)
         Remove-CimInstance -Namespace 'root\subscription' -Query "SELECT * FROM LogFileEventConsumer WHERE Name='$Name'"
+        Write-Verbose ($localizedData.RemovedConsumerInstance -f $Name)
     }
 }
 
@@ -103,22 +134,23 @@ function Test-TargetResource
         $Ensure = 'Present'
     )
 
+    Write-Verbose ($localizedData.GettingConsumerInstance -f $Name)
     $LogFileConsumer = Get-CimInstance -Namespace 'root\subscription' -Query "SELECT * FROM LogFileEventConsumer WHERE Name='$Name'"
     
     if ($Ensure -eq 'Present') {
         if ($LogFileConsumer) {
-            Write-Verbose "Log File consumer with the name ${Name} already exists. No action needed"
+            Write-Verbose ($localizedData.ConsumerExistsNoAction -f $Name)
             return $true
         } else {
-            Write-Verbose "Log File consumer with the name ${Name} does not exist. It will be created"
+            Write-Verbose ($localizedData.ConsumerDoesNotExistShouldCreate -f $Name)
             return $false
         }
     } else {
         if ($LogFileConsumer) {
-            Write-Verbose "Log File consumer with the name ${Name} already exists. It will be removed"
+            Write-Verbose ($localizedData.ConsumerExistsShouldRemove -f $Name)
             return $false
         } else {
-            Write-Verbose "Log File consumer with the name ${Name} does not exist. No action needed"
+            Write-Verbose ($localizedData.ConsumerDoesNotExistNoAction -f $Name)
             return $true
         }
     }
