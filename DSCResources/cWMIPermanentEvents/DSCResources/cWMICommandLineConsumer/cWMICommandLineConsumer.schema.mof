@@ -1,0 +1,10 @@
+[ClassVersion("1.0"), FriendlyName("cWMICommandLineConsumer")]
+class cWMICommandLineConsumer : OMI_BaseResource
+{
+	[Key] string Name;
+	[Required] string CommandLineTemplate;
+	[Write] string ExecutablePath;
+	[Write] string WorkingDirectory;
+	[Write, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
+};
+

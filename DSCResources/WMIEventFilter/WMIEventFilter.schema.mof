@@ -1,8 +1,0 @@
-[ClassVersion("1.0"), FriendlyName("WMIEventFilter")]
-class WMIEventFilter : OMI_BaseResource 
-{
-	[Key] string Name;
-	[Required] string Query;
-	[write] string EventNamespace;
-	[write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
-};
