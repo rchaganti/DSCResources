@@ -87,7 +87,7 @@ function Set-TargetResource
         [String] $managementServerName,
 
         [Parameter()]
-        [Int] $managementServerPort = 5723,
+        [UInt32] $managementServerPort = 5723,
 
         [Parameter()]
         [PSCredential] $actionAccountCredential,
@@ -98,7 +98,7 @@ function Set-TargetResource
         [Parameter()]
         [ValidateSet('Present','Absent')]
         [String] $Ensure = 'Present'
-    )     
+    )
 
     try {
         Write-Verbose $LocalizedData.GetMMAgentConfig
@@ -163,7 +163,7 @@ function Test-TargetResource
         [String] $managementServerName,
 
         [Parameter()]
-        [Int] $managementServerPort = 5723,
+        [UInt32] $managementServerPort = 5723,
 
         [Parameter()]
         [PSCredential] $actionAccountCredential,
