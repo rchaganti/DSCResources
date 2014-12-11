@@ -11,8 +11,7 @@ ConvertFrom-StringData @'
     EnabledAzureOpInsights=Enabled Azure Operational Insights with Workspace ID {0}.
     DisableAzureOpInsights=Disabling Azure Operational Insights with Workspace ID {0}.
     DisabledAzureOpInsights=Disabled Azure Operational Insights with Workspace ID {0}.
-    UpdateWorkspaceWithAbsent=UpdateWorkspace property cannot be used when Ensure is set to Absent.
-    UpdateWorkspaceFound=UpdateWorkspace property is set to True.
+    ForceFound=Force property is set to True.
     AzureOpInsightsEnabledNoAction=Azure Operational Insights is enabled with Workspace ID {0}. No action Needed.
     AzureOpInsightsNotEnabledShouldEnable=Azure Operational Insights is not enabled with Workspace ID {0}. It will be enabled.
     AzureOpInsightsEnabledShouldRemoved=Azure Operational Insights is enabled with Workspace ID {0}. It will be disabled.
@@ -84,7 +83,7 @@ function Set-TargetResource
         [String] $WorkspaceKey,
 
         [Parameter()]
-        [Bool] $UpdateWorkspace,
+        [Bool] $Force,
 
         [Parameter()]
         [ValidateSet('Present','Absent')]
@@ -95,7 +94,7 @@ function Set-TargetResource
         Write-Verbose $LocalizedData.GetMMAgentConfig
         $MMAgentConfig = New-Object -ComObject 'AgentConfigManager.MgmtSvcCfg'
     
-        if ($Ensure -eq 'Present' -or ($UpdateWorkspace))
+        if ($Ensure -eq 'Present' -or ($Force))
         {
             Write-Verbose ($LocalizedData.EnableAzureOpInsights -f $WorkspaceID)
             $MMAgentConfig.EnableAzureOperationalInsights($WorkspaceID, $WorkspaceKey)
@@ -139,16 +138,12 @@ function Test-TargetResource
         [String] $WorkspaceKey,
 
         [Parameter()]
-        [Bool] $UpdateWorkspace,
+        [Bool] $Force,
 
         [Parameter()]
         [ValidateSet('Present','Absent')]
         [String]$Ensure='Present'
     ) 
-    
-    if ($UpdateWorkspace -and ($Ensure -eq 'Absent')){
-        throw $LocalizedData.UpdateWorkspaceWithAbsent
-    }
     
     try {
         Write-Verbose $localizedData.GetMMAgentConfig
@@ -164,8 +159,8 @@ function Test-TargetResource
             $AzureOpInsightsEnabled = $false
         }
 
-        if ($UpdateWorkspace) {
-            Write-Verbose $localizedData.UpdateWorkspaceFound
+        if ($Force) {
+            Write-Verbose $localizedData.ForceFound
             return $false
         } elseif ($Ensure -eq 'Present') {
             if ($AzureOpInsightsEnabled) {

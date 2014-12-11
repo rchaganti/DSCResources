@@ -7,8 +7,7 @@ ConvertFrom-StringData @'
     EnabledAzureOpInsights=Enabled Azure Operational Insights with Workspace ID {0}.
     DisableAzureOpInsights=Disabling Azure Operational Insights with Workspace ID {0}.
     DisabledAzureOpInsights=Disabled Azure Operational Insights with Workspace ID {0}.
-    UpdateWorkspaceWithAbsent=UpdateWorkspace property cannot be used when Ensure is set to Absent.
-    UpdateWorkspaceFound=UpdateWorkspace property is set to True.
+    ForceFound=Force property is set to True.
     AzureOpInsightsEnabledNoAction=Azure Operational Insights is enabled with Workspace ID {0}. No action Needed.
     AzureOpInsightsNotEnabledShouldEnable=Azure Operational Insights is not enabled with Workspace ID {0}. It will be enabled.
     AzureOpInsightsEnabledShouldRemoved=Azure Operational Insights is enabled with Workspace ID {0}. It will be disabled.
