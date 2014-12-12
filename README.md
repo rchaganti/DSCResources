@@ -24,7 +24,7 @@ Custom DSC resource modules in this repository are packaged as different categor
 	- [cMMAgentAD](https://github.com/rchaganti/DSCResources/tree/master/cMMAgent/DSCResources/cMMAgentAD) is used to enable or disable Active Directory integration for the Microsoft Management Agent. By enabling AD integration, you can assign agent-managed computers to management groups.
 	- [cMMAgentManagementGroups](https://github.com/rchaganti/DSCResources/tree/master/cMMAgent/DSCResources/cMMAgentManagementGroups) DSC resource can be used to add or remove management groups. You can use this resource to update the action account credentials for the management agent service.
 
-These modules are available on [PowerShellGallery.com](PowerShellGallery.com). If you are using Windows PowerShell 5.0 Preview, you can install these modules using PowerShellGet module.
+These modules are available on [PowerShellGallery.com](https://www.powershellgallery.com). If you are using Windows PowerShell 5.0 Preview, you can install these modules using PowerShellGet module.
 
     Install-Module -Name cMMAgent
     Install-Module -Name cWindowsOS
