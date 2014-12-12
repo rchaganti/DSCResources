@@ -2,7 +2,6 @@
 ### Custom DSC resource modules by [PowerShell Magazine](http://www.powershellmagazine.com "PowerShell Magazine"). ###
 
 ----------
-
 Custom DSC resource modules in this repository are packaged as different categories based on the functionality.
 - WMI Permanent Events Module ([cWMIPermanentEvents](https://github.com/rchaganti/DSCResources/tree/master/cWMIPermanentEvents))
 	- [cWMIEventFilter](https://github.com/rchaganti/DSCResources/tree/master/cWMIPermanentEvents/DSCResources/cWMIEventFilter) is used to create event filter instances for a given event query and event namespace. 
@@ -24,3 +23,9 @@ Custom DSC resource modules in this repository are packaged as different categor
 	- [cMMAgentOpInsights](https://github.com/rchaganti/DSCResources/tree/master/cMMAgent/DSCResources/cMMAgentOpInsights) is used to enable or disable Azure Operational Insights within the Microsoft Monitoring Agent. This can also be used to update the WorkspaceID and WorkspaceKey for connecting to Azure Operational Insights.
 	- [cMMAgentAD](https://github.com/rchaganti/DSCResources/tree/master/cMMAgent/DSCResources/cMMAgentAD) is used to enable or disable Active Directory integration for the Microsoft Management Agent. By enabling AD integration, you can assign agent-managed computers to management groups.
 	- [cMMAgentManagementGroups](https://github.com/rchaganti/DSCResources/tree/master/cMMAgent/DSCResources/cMMAgentManagementGroups) DSC resource can be used to add or remove management groups. You can use this resource to update the action account credentials for the management agent service.
+
+These modules are available on [PowerShellGallery.com](PowerShellGallery.com). If you are using Windows PowerShell 5.0 Preview, you can install these modules using PowerShellGet module.
+
+    Install-Module -Name cMMAgent
+    Install-Module -Name cWindowsOS
+    Install-Module -Name cWMIPermanentEvents
