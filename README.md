@@ -24,8 +24,15 @@ Custom DSC resource modules in this repository are packaged as different categor
 	- [cMMAgentAD](https://github.com/rchaganti/DSCResources/tree/master/cMMAgent/DSCResources/cMMAgentAD) is used to enable or disable Active Directory integration for the Microsoft Management Agent. By enabling AD integration, you can assign agent-managed computers to management groups.
 	- [cMMAgentManagementGroups](https://github.com/rchaganti/DSCResources/tree/master/cMMAgent/DSCResources/cMMAgentManagementGroups) DSC resource can be used to add or remove management groups. You can use this resource to update the action account credentials for the management agent service.
 
+- Microsoft Azure Recovery Services (MARS) agent ([cMicrosoftRecoveryServicesAgent](https://github.com/rchaganti/DSCResources/tree/master/cMicrosoftAzureRecoveryServices))
+	- [cMARSAgentInstall](https://github.com/rchaganti/DSCResources/tree/master/cMicrosoftAzureRecoveryServices/DSCResources/cMARSAgentInstall) is used to install Microsoft Azure Recovery Services Agent. This is a composite resource that uses Package resource behind the scenes.
+	- [cMARSProxy](https://github.com/rchaganti/DSCResources/tree/master/cMicrosoftAzureRecoveryServices/DSCResources/cMARSProxy) is used to configure the proxy settings for the MARS agent to connect to the Azure Backup Vault.
+	- [cMARSRegistration](https://github.com/rchaganti/DSCResources/tree/master/cMicrosoftAzureRecoveryServices/DSCResources/cMARSRegistration) DSC resource should be used to register a target system with the Azure backup vault.
+	- [cMARSEncryptionPhrase](https://github.com/rchaganti/DSCResources/tree/master/cMicrosoftAzureRecoveryServices/DSCResources/cMARSEncryptionPhrase) is used to configure the encryption settings for the MARS agent service.
+
 These modules are available on [PowerShellGallery.com](https://www.powershellgallery.com). If you are using Windows PowerShell 5.0 Preview, you can install these modules using PowerShellGet module.
 
     Install-Module -Name cMMAgent
     Install-Module -Name cWindowsOS
     Install-Module -Name cWMIPermanentEvents
+    Install-Module -Name cMicrosoftAzureRecoveryServices

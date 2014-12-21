@@ -71,7 +71,7 @@ The [cMMAgentProxyName](https://github.com/rchaganti/DSCResources/tree/master/cM
 The only property here is the *ProxyName* property. For this, you need to specify a proxy URL (either HTTP or HTTPS) with any port number as required. The following configuration script demonstrates this usage.
 
     cMMAgentProxyName MMAgentProxy {
-        ProxyName = 'https://moxy.us.dell.com:3128'
+        ProxyName = 'https://MyProxy:1010'
         Ensure = 'Present'
     }
 

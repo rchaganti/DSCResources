@@ -3,23 +3,21 @@
 
 ----------
 
-Microsoft Recovery Services Agent (MARS) is used to connect target systems to Azure Backup or Recovery Services vault. This DSC resource module intends to build custom resources for installing and configuring MARS Agent on target systems.
+[Microsoft Azure Recovery Services Agent](http://azure.microsoft.com/en-in/documentation/articles/backup-configure-vault/) (MARS) is used to connect target systems to Azure Backup or Recovery Services vault. This [DSC resource module](https://github.com/rchaganti/DSCResources/tree/master/cMicrosoftAzureRecoveryServices) intends to build custom resources for installing and configuring MARS Agent on target systems.
 
-- [cMMAgentInstall](https://github.com/rchaganti/DSCResources/tree/master/cMMAgent/DSCResources/cMMAgentInstall) is used to install Microsoft Monitoring Agent.
-- [cMMAgentProxyName](https://github.com/rchaganti/DSCResources/tree/master/cMMAgent/DSCResources/cMMAgentProxyName) is used to add or remove the proxy URL for the Microsoft Monitoring Agent configuration.
-- [cMMAgentProxyCredential](https://github.com/rchaganti/DSCResources/tree/master/cMMAgent/DSCResources/cMMAgentProxyCredential) is used to add, modify, or remove the credentials that need to be used to authenticate to a proxy configured using cMMAgentProxyName resource.
-- [cMMAgentOpInsights](https://github.com/rchaganti/DSCResources/tree/master/cMMAgent/DSCResources/cMMAgentOpInsights) is used to enable or disable Azure Operational Insights within the Microsoft Monitoring Agent. This can also be used to update the WorkspaceID and WorkspaceKey for connecting to Azure Operational Insights.
-- [cMMAgentAD](https://github.com/rchaganti/DSCResources/tree/master/cMMAgent/DSCResources/cMMAgentAD) is used to enable or disable Active Directory integration for the Microsoft Management Agent. By enabling AD integration, you can assign agent-managed computers to management groups.
-- [cMMAgentManagementGroups](https://github.com/rchaganti/DSCResources/tree/master/cMMAgent/DSCResources/cMMAgentManagementGroups) DSC resource can be used to add or remove management groups. You can use this resource to update the action account credentials for the management agent service.
+- [cMARSAgentInstall](https://github.com/rchaganti/DSCResources/tree/master/cMicrosoftAzureRecoveryServices/DSCResources/cMARSAgentInstall) is used to install Microsoft Azure Recovery Services Agent. This is a composite resource that uses Package resource behind the scenes.
+- [cMARSProxy](https://github.com/rchaganti/DSCResources/tree/master/cMicrosoftAzureRecoveryServices/DSCResources/cMARSProxy) is used to configure the proxy settings for the MARS agent to connect to the Azure Backup Vault.
+- [cMARSRegistration](https://github.com/rchaganti/DSCResources/tree/master/cMicrosoftAzureRecoveryServices/DSCResources/cMARSRegistration) DSC resource should be used to register a target system with the Azure backup vault.
+- [cMARSEncryptionPhrase](https://github.com/rchaganti/DSCResources/tree/master/cMicrosoftAzureRecoveryServices/DSCResources/cMARSEncryptionPhrase) is used to configure the encryption settings for the MARS agent service.
 
-I could have combined the resources into just a couple of them but that increases the complexity of the resource module. Therefore, I decided to go much granular and divide these into multiple resources. For example, the [cMMAgentProxyCredential](https://github.com/rchaganti/DSCResources/tree/master/cMMAgent/DSCResources/cMMAgentProxyCredential) resource lets you not just add or remove credentials but also update the credentials, if required.
+At present, this resource module contains four DSC resources that are the fundamental building blocks for using MARS Agent.
 
-####Using cMMAgentInstall resource####
-The [cMMAgentInstall](https://github.com/rchaganti/DSCResources/tree/master/cMMAgent/DSCResources/cMMAgentInstall) is a composite DSC resource. This can be used to install MMAgent in an unattended manner. Behind the scenes, this resource uses the Package DSC resource.
+####Using cMARSAgentInstall resource####
+The [cMARSgentInstall](https://github.com/rchaganti/DSCResources/tree/master/cMicrosoftAzureRecoveryServices/DSCResources/cMARSAgentInstall) is a composite DSC resource. This can be used to install MARS Agent in an unattended manner. Behind the scenes, this resource uses the Package DSC resource.
 
-![](http://i.imgur.com/5WTBryD.png)
+![](http://i.imgur.com/DsqnEob.png)
 
-The *Path* property is used to specify a local folder path where MMAgent installer is stored. This can also be the HTTP location for downloading an installer. For example, the following function can be used to get the redirected URL from fwlink on Microsoft site.
+The *SetupPath* property is used to specify a local folder path where MARS Agent installer is stored. This can also be the HTTP location for downloading an installer. For example, the following function can be used to get the redirected URL from fwlink on Microsoft site.
 
     Function Get-TrueURL {   
        Param (
@@ -39,66 +37,62 @@ The *Path* property is used to specify a local folder path where MMAgent install
        }
     }
 
-The fwlink to download MMAgent installer is http://go.microsoft.com/fwlink/?LinkID=517476.
+The fwlink to download MARS Agent installer is [https://go.microsoft.com/fwLink/?LinkID=288905&clcid=0x409](https://go.microsoft.com/fwLink/?LinkID=288905&clcid=0x409).
 
-    $TrueUrl = Get-TrueUrl -Url 'http://go.microsoft.com/fwlink/?LinkID=517476'
+    $TrueUrl = Get-TrueUrl -Url 'https://go.microsoft.com/fwLink/?LinkID=288905&clcid=0x409'
 
 Now, this redirected URL can be given as value can be given as the value of *Path* property. The Package resource downloads the installer before it attempts to install it on the target system.
 
-The *WorkspaceID* and the *WorkspaceKey* can be retrieved from the [Azure Operational Insights preview portal](https://preview.opinsights.azure.com) by navigating to Servers & Usage -> Configure.
-
-![](http://i.imgur.com/k2Q7q9j.png)
-
 Here is a configuration script that uses the cMMAgentInstall composite resource.
 
-    Configuration MMASetup {
-       Import-DscResource -Module cMMAgent -Name cMMAgentInstall
-       cMMAgentInstall MMASetup {
-          Path = 'C:\OpInsights\MMASetup-AMD64.exe'
-          Ensure = 'Present'
-          WorkspaceID = 'your-Workspace-Id'
-          WorkspaceKey = 'Your-Workspace-Key'
-       }
+    cMARSAgentInstall AgentSetup {
+    	SetupPath = 'C:\AzureBackup\MARSAgentInstaller.exe'
+    	EnableWindowsUpdate = $true
+    	Ensure = 'Present'
     }
-    
-    MMASetup
 
-####Using cMMAgentProxyName resource####
-The [cMMAgentProxyName](https://github.com/rchaganti/DSCResources/tree/master/cMMAgent/DSCResources/cMMAgentProxyName) resource can be used to add or remove the proxy URL to the Microsoft Monitoring Agent configuration.
+The *EnableWindowsUpdate* property when specified uses Windows Update, after the install, to check if there are any updates to the agent software. This property is not mandatory.
 
-![](http://i.imgur.com/ffrLq64.png)
+Once you have installed the MARS agent, you can register the target system with the backup vault. But, before that, if your target system is behind a proxy server, you need to specify the proxy server and proxy port. This can be done using the [cMARSProxy](https://github.com/rchaganti/DSCResources/tree/master/cMicrosoftAzureRecoveryServices/DSCResources/cMARSProxy) DSC resource. 
 
-The only property here is the *ProxyName* property. For this, you need to specify a proxy URL (either HTTP or HTTPS) with any port number as required. The following configuration script demonstrates this usage.
+####Using cMARSProxy resource####
+The [cMARSProxy](https://github.com/rchaganti/DSCResources/tree/master/cMicrosoftAzureRecoveryServices/DSCResources/cMARSProxy) resource can be used to add or remove proxy settings for the Microsoft Azure Recovery Services Agent.
 
-    cMMAgentProxyName MMAgentProxy {
-        ProxyName = 'https://moxy.us.dell.com:3128'
+![](http://i.imgur.com/GlIFg7B.png)
+
+The only property that is mandatory is the *ProxyServer*. For this, you need to specify a proxy URL (either HTTP or HTTPS). The following configuration script demonstrates this usage.
+
+    cMARSProxy MARSProxy {
+        ProxyServer = 'https://myProxy'
         Ensure = 'Present'
     }
 
-####Using cMMAgentProxyCredential resource####
-The [cMMAgentProxyName](https://github.com/rchaganti/DSCResources/tree/master/cMMAgent/DSCResources/cMMAgentProxyName) resource only lets you configure the proxy URL that needs to be used to connect to the Azure Operational Insights service. However, if the proxy requires authentication, you can use the [cMMAgentProxyCredential](https://github.com/rchaganti/DSCResources/tree/master/cMMAgent/DSCResources/cMMAgentProxyCredential) resource configure the same.
+DO NOT add the proxy port as a part of the URL. Instead, use the *ProxyPort* property. 
 
-![](http://i.imgur.com/fjOn1j3.png)
+    cMARSProxy MARSProxy {
+        ProxyServer = 'https://myProxy'
+        ProxyPort = 1010
+        Ensure = 'Present'
+    }
 
-When I was writing this resource module, there was a challenge in having only a *PSCredential* type property as the Key property. The schema MOF was failing validation and therefore forced me to separate it into *ProxyUserName* and *ProxyUserPassword* properties. The *ProxyUserPassword* is of type PSCredential and you can use the *Get-Credential* cmdlet to supply that. The user name you supply as a part of the PSCredential will not be used. Instead, the value supplied as an argument for the *ProxyUserName* property will be used.
+Optionally, if your proxy server requires authentication, you can specify that using the *ProxyCredential* property. This is a *PSCredential* type property and therefore you need to use certificates to encrypt the credentials within the configuration. In case you don't have the certificates for your development or test environment, you can pass the clear-text credentials.
 
-Note that DSC best practices recommend that you encrypt the credentials used in a configuration script. So, ideally, you should use certificates to encrypt and decrypt the credentials. For test and development purposes, however, you can use the plain text passwords and this can be achieved by using DSC configuration data. The following example demonstrates this.
-
-    $ProxyUserPassword = Get-Credential
+    $ProxyCredential = Get-Credential
     
     $ConfigData = @{
        AllNodes = @(
           @{ NodeName = '*'; PsDscAllowPlainTextPassword = $true },
-          @{ NodeName = 'WMF5-1' }
+          @{ NodeName = 'MARSDemo' }
        )
     }
     
-    Configuration MMAgentConfiguration {
-       Import-DscResource -ModuleName cMMAgent
+    Configuration MARSAgentConfiguration {
+       Import-DscResource -ModuleName cMicrosoftAzureRecoveryServices
        Node $AllNodes.NodeName {
-          cMMAgentProxyCredential MMAgentProxyCred {
-             ProxyUserName = 'ravikanth'
-             ProxyUserPassword = $ProxyUserPassword
+          cMARSProxy MARSProxy {
+             ProxyServer = 'https://myProxy'
+             ProxyPort = 1010
+             ProxyCredential = $ProxyCredential
              Ensure = 'Present'
           }
        }
@@ -106,133 +100,74 @@ Note that DSC best practices recommend that you encrypt the credentials used in 
 
 Once you set the proxy credentials, if you need to change the password alone within the credentials, you can use the *Force* property to force that change. When using *Force* property.
 
-    $NewProxyUserPassword = Get-Credential
+    $ProxyCredential = Get-Credential
     
     $ConfigData = @{
        AllNodes = @(
           @{ NodeName = '*'; PsDscAllowPlainTextPassword = $true },
-          @{ NodeName = 'WMF5-1' }
+          @{ NodeName = 'MARSDemo' }
        )
     }
     
-    Configuration MMAgentConfiguration {
-       Import-DscResource -ModuleName cMMAgent
+    Configuration MARSAgentConfiguration {
+       Import-DscResource -ModuleName cMicrosoftAzureRecoveryServices
        Node $AllNodes.NodeName {
-          cMMAgentProxyCredential MMAgentProxyCred {
-             ProxyUserName = 'ravikanth'
-             ProxyUserPassword = $NewProxyUserPassword
-             Force = $True
+          cMARSProxy MARSProxy {
+             ProxyServer = 'https://myProxy'
+             ProxyPort = 1010
+             ProxyCredential = $ProxyCredential
              Ensure = 'Present'
+			 Force = $true
           }
        }
     }
 
-####Using cMMAgentOpInsights resource####
-The [cMMAgentInstall](https://github.com/rchaganti/DSCResources/tree/master/cMMAgent/DSCResources/cMMAgentInstall) resource, by default, enables the Microsoft Monitoring Agent for Azure Operational Insights. This resource also configures the WorkspaceID and the WorkspaceKey required to connect to the Operational Insights service. 
+####Using cMARSRegistration resource####
+The [cMARSRegistration](https://github.com/rchaganti/DSCResources/tree/master/cMicrosoftAzureRecoveryServices/DSCResources/cMARSRegistration) resource can be used to register the target system with Azure Backup vault. For registering with the backup vault, we need the vault credentials. These credentials can be downloaded from the [Azure Portal](http://manage.windowsazure.com) by navigating to the Backup Vault.
 
-The [cMMAgentOpInsights](https://github.com/rchaganti/DSCResources/tree/master/cMMAgent/DSCResources/cMMAgentOpInsights) resource can be used to update the *WorkspaceID* and *WorkspaceKey*, if required and also to disable Azure Operational Insights within the Microsoft Monitoring Agent.
+![](http://i.imgur.com/72VisGt.png)
 
-![](http://i.imgur.com/pu2ZW6G.png)
+Once these vault credentials are downloaded and stored in a local folder, we can use the *cMARSRegistration* resource configuration to register the server. The *VaultCredential* property can be used to specify the absolute path to the vault credentials file.
 
-By setting both the *WorkspaceID* and the *WorkspaceKey* properties and *Ensure* to *Present*, you can enable Azure Operational Insights and update the WorkspaceID and WorkspaceKey.
+![](http://i.imgur.com/JVIsUxH.png)
 
-        cMMAgentOpInsights MMAgentOpInsights {
-            WorkspaceID = 'your-Workspace-ID'
-            WorkspaceKey = 'your-Workspace-Key'
-            Ensure = 'Absent'
-        }
-
-By setting *Ensure* to *Absent* along with required properties, Azure Operational Insights can be disable for the Microsoft Monitoring Agent.
-
-        cMMAgentOpInsights MMAgentOpInsights {
-            WorkspaceID = 'your-Workspace-ID'
-            WorkspaceKey = 'your-Workspace-Key'
-            Ensure = 'Absent'
-        }
-
-If you need to update only the WorkspaceKey, you can do that using the *Force* property.
-
-        cMMAgentOpInsights MMAgentOpInsights {
-            WorkspaceID = 'your-Workspace-ID'
-            WorkspaceKey = 'your-new-Workspace-Key'
-            Force = $true
-        }
-
-####Using cMMAgentAD resource####
-The [cMMAgentAD](https://github.com/rchaganti/DSCResources/tree/master/cMMAgent/DSCResources/cMMAgentAD) resource can be used to enable or disable Active Directory (AD) integration. With AD Directory Services integration, the agent-managed computers can be automatically assigned to the Operations Manager management groups.
-
-![](http://i.imgur.com/BsQz7VV.png)
-
-There is only one property that is *EnableAD*. This is a boolean property. Setting this to *True* enables AD integration and disables otherwise.
-
-    cMMAgentAD MMAgentAD {
-        EnableAD = $true
-    }
-
-####Using cMMAgentManagementGroups resource####
-The cMMAgentManagementGroups resource enables you to add or remove Operations Manager management groups from the Microsoft Monitoring Agent configuration. Additionally, you can configure action account credentials for the agent service.
-
-![](http://i.imgur.com/IZIW4q2.png)
-
-The *ManagementGroupName* and *ManagementServerName* properties are mandatory. The *ManagementServerPort* is optional and set to 5723, by default. This property need not be changed unless your Operations Manager implementation is customized.
-
-    cMMAgentManagementGroups MMAgentManagementGrup {
-        managementGroupName = 'SCMgmtGroup'
-        managementServerName = 'SCOM-1'
+    cMARSRegistration AgentRegistration {
+        VaultCredential = 'C:\AzureBackup\DSCResourceDemo.VaultCredentials'
         Ensure = 'Present'
     }
 
-You can specify the action account credentials for the management agent service. This needs to be a *PSCredential* object. So, as per the DSC best practices, you must encrypt these credentials using certificates.
+Make a note that the path specified must be absolute path. When the registration is complete, you can see the server listed in the backup vault dashboard.
 
-    cMMAgentManagementGroups MMAgentManagementGrup {
-        managementGroupName = 'SCMgmtGroup'
-        managementServerName = 'SCOM-1'
-        actionAccountCredential = $Credential
-        Ensure = 'Present'
-    }
+![](http://i.imgur.com/ogsKhOV.png)
 
-If you do not have certificate implementation in your test or development infrastructure, you can use DSC configuration data to allow plain-text credentials.
+Once the target system registration is complete, you can set the encryption pass phrase to encrypt the backup that is going to the backup vault. This is done using [cMARSEncryptionPhrase](https://github.com/rchaganti/DSCResources/tree/master/cMicrosoftAzureRecoveryServices/DSCResources/cMARSEncryptionPhrase) DSC resource.
 
-    $ActionAccountCredential = Get-Credential
-    
-    $ConfigData = @{
-       AllNodes = @(
-          @{ NodeName = '*'; PsDscAllowPlainTextPassword = $true },
-          @{ NodeName = 'WMF5-1' }
-       )
-    }
-    
-    Configuration MMAgentConfiguration {
-       Import-DscResource -ModuleName cMMAgent
-      Node $AllNodes.NodeName {
-         cMMAgentManagementGroups MMAgentManagementGrup {
-            managementGroupName = 'SCMgmtGroup'
-            managementServerName = 'SCOM-1'
-            actionAccountCredential = $ActionAccountCredential
+Note that there is no method de-register a target system. There is no API available for that. Therefore, when you sent *Ensure='Absent'*, you just see a message that the *Absent* functionality is not implemented.
+
+You can uninstall the recovery services agent when you don't need to backup the system anymore. However, remember that uninstalling the agent does not remove the system registration from the backup vault. You need to manually remove the server by navigating to the backup vault on the Azure management portal.
+
+####Using cMARSEncryptionPhrase resource####
+The *cMARSEncryptionPhrase* resource enables you to configure the  encryption settings for the MARS Agent Service. This encryption phrase will be used as the encryption key to encrypt the contents of your server backup.
+
+![](http://i.imgur.com/Yl2gLI5.png)
+
+The *EncryptionPassPhrase* is the only manadatory property and takes clear-text string as the passphrase. The resource module internally converts the clear-text string to secure string type required for the agent service configuration.
+
+A secure string cannot be directly implemented as the MOF schema does not support a *securestring* type. This can be collected as a credential but it does not make a lot of sense. So, I left it as the clear-text string for now. This may change in a future release.
+
+        cMARSEncryptionPhrase Passphrase {
+            EncryptionPassPhrase = 'fawr123456789012345'
             Ensure = 'Present'
-         }
-       }
-    }
+        }
 
-Once you add a management group, if you need to update the action account credentials, you can use the *Force* property. When you set *Force* property to True, the action account credentials get updated. The value of *Ensure* property has no meaning when using the *Force* property. Also, when using *Force*, the *actionAccountCredential* property must be set.
+Note that the length of the passphrase must be at least 16 characters. 
 
-    $updatedActionAccountCredential = Get-Credential
-    
-    $ConfigData = @{
-       AllNodes = @(
-          @{ NodeName = '*'; PsDscAllowPlainTextPassword = $true },
-          @{ NodeName = 'WMF5-1' }
-       )
-    }
-    
-    Configuration MMAgentConfiguration {
-       Import-DscResource -ModuleName cMMAgent
-       Node $AllNodes.NodeName {
-          cMMAgentManagementGroups MMAgentManagementGrup {
-             managementGroupName = 'SCMgmtGroup'
-             managementServerName = 'SCOM-1'
-             actionAccountCredential = $updatedActionAccountCredential
-             Force = $true
-          }
-       }
-    }
+Once the passphrase is set, if you need to modify the passphrase, you can use the *Force* property.
+
+        cMARSEncryptionPhrase Passphrase {
+            EncryptionPassPhrase = 'fawr12345asf2012345'
+            Force = $true
+            Ensure = 'Present'
+        }
+  
+Note that there is no way in the API (AFAIK) to remove the passphrase or encryption settings. Therefore, specifying *Ensure='Absent'* has no effect on the agent's encryption settings.
