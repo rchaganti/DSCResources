@@ -1,0 +1,9 @@
+[ClassVersion("1.0"), FriendlyName("cMARSProxy")] 
+class cMARSProxy: OMI_BaseResource
+{
+  [Key] string ProxyServer;
+  [Write] Uint32 ProxyPort;
+  [Write,EmbeddedInstance("MSFT_Credential")] string ProxyCredential;
+  [write] boolean Force;
+  [Write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
+};
