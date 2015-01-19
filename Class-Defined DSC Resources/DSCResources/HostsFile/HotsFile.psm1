@@ -67,7 +67,7 @@ class HostsFile
           }
       }
  
-      [Hashtable] Get()
+      [HostsFile] Get()
       {
           $Configuration = [hashtable]::new()
           $Configuration.Add("IPAddress",$IPAddress)
