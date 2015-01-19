@@ -12,14 +12,14 @@ ConvertFrom-StringData @'
     RemovingHostsFileEntry=Removing a hosts file entry with {0} and {1}.
     HostsFileEntryAdded=Created the hosts file entry for {0} and {1}.
     HostsFileEntryRemoved=Removed the hosts file entry for {0} and {1}.
-    AnErrorOccurred=An error occurred while creating hosts file entry: {1}.
-    InnerException=Nested error trying to create hosts file entry: {1}.
+    AnErrorOccurred=An error occurred while creating hosts file entry: {p}.
+    InnerException=Nested error trying to create hosts file entry: {0}.
 '@
 }
 
 if (Test-Path $PSScriptRoot\en-us)
 {
-    Import-LocalizedData LocalizedData -filename HostsFile.psd1
+    Import-LocalizedData LocalizedData -filename cHostsFile.psd1
 }
 
 function Get-TargetResource
