@@ -1,4 +1,4 @@
-﻿function Get-TargetResource
+function Get-TargetResource
 {
 	[CmdletBinding()]
 	[OutputType([System.Collections.Hashtable])]
@@ -86,7 +86,7 @@ function Set-TargetResource
                 $parameters["Name"] = $Name
                 $parameters["NetAdapterName"] = $NetAdapterName
                 $parameters["MinimumBandwidthMode"] = $MinimumBandwidthMode
-                if($AllowManagementOS){$parameters["AllowManagementOS"]=$AllowManagementOS}
+                if($PSBoundParameters.ContainsKey("AllowManagementOS")){$parameters["AllowManagementOS"]=$AllowManagementOS}
                 $null = New-VMSwitch @parameters
                 Write-Verbose -Message "Switch $Name has right netadapter $NetAdapterName"
             }
@@ -119,7 +119,7 @@ function Set-TargetResource
             {
                 $parameters["NetAdapterName"] = $NetAdapterName
                 $parameters["MinimumBandwidthMode"] = $MinimumBandwidthMode
-                if($AllowManagementOS)
+                if($PSBoundParameters.ContainsKey("AllowManagementOS"))
                 {
                     $parameters["AllowManagementOS"] = $AllowManagementOS
                 }
