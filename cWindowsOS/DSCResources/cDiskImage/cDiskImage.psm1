@@ -23,7 +23,7 @@ ConvertFrom-StringData @'
 
 if (Test-Path $PSScriptRoot\en-us)
 {
-    Import-LocalizedData LocalizedData -filename DiskImage.psd1
+    Import-LocalizedData LocalizedData -filename cDiskImage.psd1
 }
 
 Function Get-TargetResource {
@@ -43,7 +43,7 @@ Function Get-TargetResource {
         [string] $ImagePath,
 
         [Parameter(Mandatory)]
-        [string] $DriveLtter,
+        [string] $DriveLetter,
 
         [Parameter()]
         [ValidateSet('Present','Absent')]
@@ -52,13 +52,13 @@ Function Get-TargetResource {
 
     $Configuration = @{
         ImagePath = $ImagePath
-        DriveLetter = $DriveLtter
+        DriveLetter = $DriveLetter
     }
 
     Write-Verbose ($localizedData.GetDiskImage -f $ImagePath)
     $DiskImage = Get-DiskImage -ImagePath $ImagePath
     if ($DiskImage.Attached) {
-        if (($DiskImage | Get-Volume).DriveLetter -eq $DriveLtter) {
+        if (($DiskImage | Get-Volume).DriveLetter -eq $DriveLetter) {
             Write-Verbose ($localizedData.DiskImageMounted -f $ImagePath)
             $Configuration.Add('Ensure','Present')
         } else {
@@ -88,14 +88,14 @@ Function Set-TargetResource {
         [string] $ImagePath,
 
         [Parameter(Mandatory)]
-        [string] $DriveLtter,
+        [string] $DriveLetter,
 
         [Parameter()]
         [ValidateSet('Present','Absent')]
         [string] $Ensure = 'Present'
     )
 
-    $DriveLetter = $DriveLtter + ':'
+    $DriveLetter = $DriveLetter + ':'
 
     if ($Ensure -eq 'Present') {
         Write-Verbose ($localizedData.MountingDiskImage -f $ImagePath)
@@ -103,9 +103,9 @@ Function Set-TargetResource {
         Write-Verbose ($localizedData.MountedDiskImage -f $ImagePath)
         $DiskVolume = Get-CimInstance -ClassName Win32_Volume | Where-Object { $_.DeviceID -eq $DiskImage.ObjectId }
 
-        Write-Verbose ($localizedData.SetDriveLetetr -f $DriveLtter)
+        Write-Verbose ($localizedData.SetDriveLetetr -f $DriveLetter)
         Set-CimInstance -Property @{DriveLetter= $DriveLetter } -InputObject $DiskVolume
-        Write-Verbose ($localizedData.DriverLetterSet -f $DriveLtter)
+        Write-Verbose ($localizedData.DriverLetterSet -f $DriveLetter)
     } else {
         Write-Verbose ($localizedData.DisMountingDiskImage -f $DiskImage)
         Dismount-DiskImage -ImagePath $ImagePath
@@ -132,7 +132,7 @@ Function Test-TargetResource {
 
         [Parameter(Mandatory)]
         [ValidateScript({-not (Test-Path $_)})]
-        [string] $DriveLtter,
+        [string] $DriveLetter,
 
         [Parameter()]
         [ValidateSet('Present','Absent')]
@@ -142,7 +142,7 @@ Function Test-TargetResource {
     Write-Verbose ($localizedData.GetDiskImage -f $ImagePath)
     $DiskImage = Get-DiskImage -ImagePath $ImagePath
     if ($DiskImage.Attached) {
-        if (($DiskImage | Get-Volume).DriveLetter -eq $DriveLtter) {
+        if (($DiskImage | Get-Volume).DriveLetter -eq $DriveLetter) {
             Write-Verbose ($localizedData.MountExistsWithDriveLetter)
             $MountExists = $true
         } else {
