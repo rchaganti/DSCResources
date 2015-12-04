@@ -18,9 +18,9 @@ ConvertFrom-StringData @'
 '@
 }
 
-if (Test-Path $PSScriptRoot\en-us)
+if (Test-Path "$PSScriptRoot\$PSUICulture")
 {
-    Import-LocalizedData LocalizedData -filename WMIActiveScriptConsumer.psd1
+    Import-LocalizedData LocalizedData -filename WMIActiveScriptConsumer.psd1 -baseDirectory "$PSScriptRoot\$PSUICulture"
 }
 
 function Get-TargetResource
