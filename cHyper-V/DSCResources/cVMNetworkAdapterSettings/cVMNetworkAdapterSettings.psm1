@@ -16,9 +16,9 @@ ConvertFrom-StringData @'
 '@
 }
 
-if (Test-Path $PSScriptRoot\en-us)
+if (Test-Path "$PSScriptRoot\$PSCulture")
 {
-    Import-LocalizedData LocalizedData -filename cVMNetworkAdapterSettings.psd1
+    Import-LocalizedData LocalizedData -filename "cVMNetworkAdapterSettings.psd1" -BaseDirectory "$PSScriptRoot\$PSCulture"
 }
 
 Function Get-TargetResource {
@@ -29,13 +29,7 @@ Function Get-TargetResource {
         [String] $Name,
 
         [Parameter(Mandatory)]
-        [String] $SwitchName,
-
-        [Parameter(Mandatory)]
-        [Bool] $ManagementOS,
-
-        [Parameter()]
-        [String] $VMName
+        [String] $SwitchName
     )
 
     if(!(Get-Module -ListAvailable -Name Hyper-V))
@@ -48,23 +42,8 @@ Function Get-TargetResource {
         SwitchName = $SwitchName
     }
 
-    if ($ManagementOS -and $VMName) {
-        throw $localizedData.VMNameAndManagementTogether
-    }
-
-    if ((-not $ManagementOS) -and (-not $VMName)) {
-        throw $localizedData.MustProvideVMName
-    }
-
     $Arguments = @{
         Name = $Name
-    }
-
-    if ($VMName) {
-        $Arguments.Add('VMName',$VMName)
-    } elseif ($ManagementOS) {
-        $Arguments.Add('ManagementOS',$true)
-        $Arguments.Add('SwitchName', $SwitchName)
     }
 
     Write-Verbose $localizedData.GetVMNetAdapter
@@ -98,8 +77,8 @@ Function Set-TargetResource {
         [Parameter(Mandatory)]
         [String] $SwitchName,
 
-        [Parameter(Mandatory)]
-        [Bool] $ManagementOS,
+        [Parameter()]
+        [Bool] $ManagementOS = $true,
 
         [Parameter()]
         [String] $VMName,
@@ -198,8 +177,8 @@ Function Test-TargetResource {
         [Parameter(Mandatory)]
         [String] $SwitchName,
 
-        [Parameter(Mandatory)]
-        [Bool] $ManagementOS,
+        [Parameter()]
+        [Bool] $ManagementOS = $true,
 
         [Parameter()]
         [String] $VMName,

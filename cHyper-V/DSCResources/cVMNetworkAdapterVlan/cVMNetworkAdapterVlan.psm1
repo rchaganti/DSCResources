@@ -26,9 +26,9 @@ ConvertFrom-StringData @'
 '@
 }
 
-if (Test-Path $PSScriptRoot\en-us)
+if (Test-Path "$PSScriptRoot\$PSCulture")
 {
-    Import-LocalizedData LocalizedData -filename cVMNetworkAdapterVlan.psd1
+    Import-LocalizedData LocalizedData -filename "cVMNetworkAdapterVlan.psd1" -BaseDirectory "$PSScriptRoot\$PSCulture"
 }
 
 Function Get-TargetResource {
@@ -36,13 +36,7 @@ Function Get-TargetResource {
 	[OutputType([System.Collections.Hashtable])]
     Param (
         [Parameter(Mandatory)]
-        [String] $Name,
-
-        [Parameter(Mandatory)]
-        [Bool] $ManagementOS,
-
-        [Parameter()]
-        [String] $VMName
+        [String] $Name
     )
 
     if(!(Get-Module -ListAvailable -Name Hyper-V))
@@ -50,41 +44,32 @@ Function Get-TargetResource {
         Throw $localizedData.HyperVModuleNotFound
     }
 
-    if ($VMName -and $ManagementOS) {
-        throw $localizedData.VMNameAndManagementTogether
-    }
-
-    if ((-not $ManagementOS) -and (-not $VMName)) {
-        throw $localizedData.MustProvideVMName
-    }
-
     $Arguments = @{
         Name = $Name
     }
 
-    if ($VMName) {
-        $Arguments.Add('VMName',$VMName)
-    } elseif ($ManagementOS) {
-        $Arguments.Add('ManagementOS', $true)
-    }
-
     Write-Verbose $localizedData.GetVMNetAdapter
-    $AdapterExists = Get-VMNetworkAdapter @Arguments -ErrorAction SilentlyContinue
+    try {
+        $AdapterExists = Get-VMNetworkAdapter @Arguments -ErrorAction Stop
 
-    if ($AdapterExists) {
-        Write-Verbose $localizedData.FoundVMNetAdapter
-        $Configuration = $Arguments
-        $Configuration.Remove('Name')
-        $Configuration.Add('AdapterMode',$AdapterExists.VlanSetting.OperationMode)
-        $Configuration.Add('VlanId',$AdapterExists.VlanSetting.AccessVlanId)
-        $Configuration.Add('NativeVlanId',$AdapterExists.VlanSetting.NativeVlanId)
-        $Configuration.Add('PrimaryVlanId',$AdapterExists.VlanSetting.PrimaryVlanId)
-        $Configuration.Add('SecondaryVlanId',$AdapterExists.VlanSetting.SecondaryVlanId)
-        $Configuration.Add('SecondaryVlanIdList',$AdapterExists.VlanSetting.SecondaryVlanIdListString)
-        $Configuration.Add('AllowedVlanIdList',$AdapterExists.VlanSetting.AllowedVlanIdListString)
+        if ($AdapterExists) {
+            Write-Verbose $localizedData.FoundVMNetAdapter
+            $Configuration = $Arguments
+            $Configuration.Remove('Name')
+            $Configuration.Add('AdapterMode',$AdapterExists.VlanSetting.OperationMode)
+            $Configuration.Add('VlanId',$AdapterExists.VlanSetting.AccessVlanId)
+            $Configuration.Add('NativeVlanId',$AdapterExists.VlanSetting.NativeVlanId)
+            $Configuration.Add('PrimaryVlanId',$AdapterExists.VlanSetting.PrimaryVlanId)
+            $Configuration.Add('SecondaryVlanId',$AdapterExists.VlanSetting.SecondaryVlanId)
+            $Configuration.Add('SecondaryVlanIdList',$AdapterExists.VlanSetting.SecondaryVlanIdListString)
+            $Configuration.Add('AllowedVlanIdList',$AdapterExists.VlanSetting.AllowedVlanIdListString)
+        }
+
+        $Configuration
+    } 
+    catch {
+        Write-Error $_
     }
-
-    $Configuration
 }
 
 Function Set-TargetResource {
@@ -93,7 +78,7 @@ Function Set-TargetResource {
         [Parameter(Mandatory)]
         [String] $Name,
 
-        [Parameter(Mandatory)]
+        [Parameter()]
         [Bool] $ManagementOS,
 
         [Parameter()]
@@ -145,66 +130,70 @@ Function Set-TargetResource {
         $Arguments.Add('ManagementOS', $true)
     }
 
-    Write-Verbose $localizedData.GetVMNetAdapter
-    $AdapterExists = Get-VMNetworkAdapter @Arguments -ErrorAction SilentlyContinue
-
-    if ($AdapterExists) {
-        Write-Verbose $localizedData.FoundVMNetAdapter
-        $SetArguments = $Arguments
-        $SetArguments.Remove('Name')
-        $SetArguments.Add('VMNetworkAdapterName',$Name)
-        switch ($AdapterMode) {
-            'Untagged' {
-                $SetArguments.Add('Untagged',$true)
-                break
-            }
-
-            'Access' {
-                $SetArguments.Add('Access',$true)
-                $SetArguments.Add('VlanId',$VlanId)
-                break
-            }
-
-            'Trunk' {
-                $SetArguments.Add('Trunk',$true)
-                $SetArguments.Add('NativeVlanId',$NativeVlanId)
-                if ($AllowedVlanIdList) {
-                    $SetArguments.Add('AllowedVlanIdList',$AllowedVlanIdList)
+    try {
+        Write-Verbose $localizedData.GetVMNetAdapter
+        $AdapterExists = Get-VMNetworkAdapter @Arguments -ErrorAction Stop
+        if ($AdapterExists) {
+            Write-Verbose $localizedData.FoundVMNetAdapter
+            $SetArguments = $Arguments
+            $SetArguments.Remove('Name')
+            $SetArguments.Add('VMNetworkAdapterName',$Name)
+            switch ($AdapterMode) {
+                'Untagged' {
+                    $SetArguments.Add('Untagged',$true)
+                    break
                 }
-                break
-            }
-
-            'Community' {
-                $SetArguments.Add('Community',$true)
-                $SetArguments.Add('PrimaryVlanId',$PrimaryVlanId)
-                if ($SecondaryVlanId) {
-                    $SetArguments.Add('SecondaryVlanId',$SecondaryVlanId)
+    
+                'Access' {
+                    $SetArguments.Add('Access',$true)
+                    $SetArguments.Add('VlanId',$VlanId)
+                    break
                 }
-                break
-            }
-
-            'Isolated' {
-                $SetArguments.Add('Isolated',$true)
-                $SetArguments.Add('PrimaryVlanId',$PrimaryVlanId)
-                if ($SecondaryVlanId) {
-                    $SetArguments.Add('SecondaryVlanId',$SecondaryVlanId)
+    
+                'Trunk' {
+                    $SetArguments.Add('Trunk',$true)
+                    $SetArguments.Add('NativeVlanId',$NativeVlanId)
+                    if ($AllowedVlanIdList) {
+                        $SetArguments.Add('AllowedVlanIdList',$AllowedVlanIdList)
+                    }
+                    break
                 }
-                break
-            }
-
-            'Promiscuous' {
-                $SetArguments.Add('Promiscuous',$true)
-                $SetArguments.Add('PrimaryVlanId', $PrimaryVlanId)
-                if ($SecondaryVlanIdList) {
-                    $SetArguments.Add('SecondaryVlanIdList', $SecondaryVlanIdList)
+    
+                'Community' {
+                    $SetArguments.Add('Community',$true)
+                    $SetArguments.Add('PrimaryVlanId',$PrimaryVlanId)
+                    if ($SecondaryVlanId) {
+                        $SetArguments.Add('SecondaryVlanId',$SecondaryVlanId)
+                    }
+                    break
                 }
-                break
+    
+                'Isolated' {
+                    $SetArguments.Add('Isolated',$true)
+                    $SetArguments.Add('PrimaryVlanId',$PrimaryVlanId)
+                    if ($SecondaryVlanId) {
+                        $SetArguments.Add('SecondaryVlanId',$SecondaryVlanId)
+                    }
+                    break
+                }
+    
+                'Promiscuous' {
+                    $SetArguments.Add('Promiscuous',$true)
+                    $SetArguments.Add('PrimaryVlanId', $PrimaryVlanId)
+                    if ($SecondaryVlanIdList) {
+                        $SetArguments.Add('SecondaryVlanIdList', $SecondaryVlanIdList)
+                    }
+                    break
+                }
             }
         }
+        
+        Write-Verbose $localizedData.PerformVMVlanSet
+        Set-VMNetworkAdapterVlan @SetArguments -ErrorAction Stop
     }
-    
-    Write-Verbose $localizedData.PerformVMVlanSet
-    Set-VMNetworkAdapterVlan @SetArguments -ErrorAction Stop
+    catch {
+        Write-Error $_
+    }
 }
 
 Function Test-TargetResource {
@@ -214,7 +203,7 @@ Function Test-TargetResource {
         [Parameter(Mandatory)]
         [String] $Name,
 
-        [Parameter(Mandatory)]
+        [Parameter()]
         [Bool] $ManagementOS,
 
         [Parameter()]
@@ -265,7 +254,7 @@ Function Test-TargetResource {
     } elseif ($ManagementOS) {
         $Arguments.Add('ManagementOS', $true)
     }
-
+    
     switch ($AdapterMode) {
         'Untagged' {
             if ($VlanId -or $NativeVlanId -or $PrimaryVlanId -or $SecondaryVlanId -or $AllowedVlanIdList -or $SecondaryVlanIdList) {
@@ -309,80 +298,87 @@ Function Test-TargetResource {
             break
         }
     }
+
+    try {
+        #There is a remote timing issue that occurs when VLAN is set just after creating a VM Adapter. This needs more investigation. Sleep until then.
+        Start-Sleep -Seconds 10
+        Write-Verbose $localizedData.GetVMNetAdapter
+        $AdapterExists = Get-VMNetworkAdapter @Arguments -ErrorAction Stop
     
-    Write-Verbose $localizedData.GetVMNetAdapter
-    $AdapterExists = Get-VMNetworkAdapter @Arguments -ErrorAction SilentlyContinue
-    
-    if ($AdapterExists) {
-        Write-Verbose $localizedData.FoundVMNetAdapter
-        if ($AdapterExists.VlanSetting.OperationMode -eq $AdapterMode) {
-            switch ($AdapterExists.VlanSetting.OperationMode) {
-                'Access' {
-                    if ($VlanId -ne $AdapterExists.VlanSetting.AccessVlanId) {
-                        Write-Verbose $localizedData.AccessVlanMustChange
-                        return $false
-                    } else {
-                        Write-Verbose $localizedData.AdaptersExistsWithVlan
-                        return $true
+        if ($AdapterExists) {
+            Write-Verbose $localizedData.FoundVMNetAdapter
+            if ($AdapterExists.VlanSetting.OperationMode -eq $AdapterMode) {
+                switch ($AdapterExists.VlanSetting.OperationMode) {
+                    'Access' {
+                        if ($VlanId -ne $AdapterExists.VlanSetting.AccessVlanId) {
+                            Write-Verbose $localizedData.AccessVlanMustChange
+                            return $false
+                        } else {
+                            Write-Verbose $localizedData.AdaptersExistsWithVlan
+                            return $true
+                        }
+                        break
                     }
-                    break
-                }
 
-                'Trunk' {
-                    if ($NativeVlanId -ne $AdapterExists.VlanSetting.NativeVlanId) {
-                        Write-Verbose $localizedData.NativeVlanMustChange
-                        return $false
-                    } elseif ($AllowedVlanIdList -ne $AdapterMode.VlanSetting.AllowedVlanIdListString) {
-                        Write-Verbose $localizedData.AllowedVlanListMustChange
-                        return $false
-                    } else {
-                        Write-Verbose $localizedData.AdaptersExistsWithVlan
-                        return $true
+                    'Trunk' {
+                        if ($NativeVlanId -ne $AdapterExists.VlanSetting.NativeVlanId) {
+                            Write-Verbose $localizedData.NativeVlanMustChange
+                            return $false
+                        } elseif ($AllowedVlanIdList -ne $AdapterMode.VlanSetting.AllowedVlanIdListString) {
+                            Write-Verbose $localizedData.AllowedVlanListMustChange
+                            return $false
+                        } else {
+                            Write-Verbose $localizedData.AdaptersExistsWithVlan
+                            return $true
+                        }
+                        break
                     }
-                    break
-                }
 
-                'Untagged' {
-                    if ($AdapterMode -eq 'Untagged') {
-                        Write-Verbose $localizedData.AdaptersExistsWithVlan
-                        Write-Verbose $localizedData.IgnoreVlan
-                        return $true
+                    'Untagged' {
+                        if ($AdapterMode -eq 'Untagged') {
+                            Write-Verbose $localizedData.AdaptersExistsWithVlan
+                            Write-Verbose $localizedData.IgnoreVlan
+                            return $true
+                        }
+                        break
                     }
-                    break
-                }
 
-                ('Community' -or 'isolated') {
-                    if ($PrimaryVlanId -ne $AdapterExists.VlanSetting.PrimaryVlanId) {
-                        Write-Verbose $localizedData.PrimaryVlanMustChange
-                        return $false
-                    } elseif ($SecondaryVlanId -ne $AdapterExists.VlanSetting.SecondaryVlanId) {
-                        Write-Verbose $localizedData.SecondaryVlanMustChange
-                        return $false
-                    } else {
-                        Write-Verbose $localizedData.AdaptersExistsWithVlan
-                        return $true
+                    ('Community' -or 'isolated') {
+                        if ($PrimaryVlanId -ne $AdapterExists.VlanSetting.PrimaryVlanId) {
+                            Write-Verbose $localizedData.PrimaryVlanMustChange
+                            return $false
+                        } elseif ($SecondaryVlanId -ne $AdapterExists.VlanSetting.SecondaryVlanId) {
+                            Write-Verbose $localizedData.SecondaryVlanMustChange
+                            return $false
+                        } else {
+                            Write-Verbose $localizedData.AdaptersExistsWithVlan
+                            return $true
+                        }
+                        break
                     }
-                    break
-                }
 
-                'Promiscuous' {
-                    if ($PrimaryVlanId -ne $AdapterExists.VlanSetting.PrimaryVlanId) {
-                        Write-Verbose $localizedData.PrimaryVlanMustChange
-                        return $false
-                    } elseif ($SecondaryVlanIdList -ne $AdapterExists.VlanSetting.SecondaryVlanIdListString) {
-                        Write-Verbose $localizedData.SecondaryVlanListMustChange
-                        return $false
-                    } else {
-                        Write-Verbose $localizedData.AdaptersExistsWithVlan
-                        return $true
+                    'Promiscuous' {
+                        if ($PrimaryVlanId -ne $AdapterExists.VlanSetting.PrimaryVlanId) {
+                            Write-Verbose $localizedData.PrimaryVlanMustChange
+                            return $false
+                        } elseif ($SecondaryVlanIdList -ne $AdapterExists.VlanSetting.SecondaryVlanIdListString) {
+                            Write-Verbose $localizedData.SecondaryVlanListMustChange
+                            return $false
+                        } else {
+                            Write-Verbose $localizedData.AdaptersExistsWithVlan
+                            return $true
+                        }
                     }
                 }
+            } else {
+                Write-Verbose $localizedData.AdapterExistsWithDifferentVlanMode
+                return $false
             }
         } else {
-            Write-Verbose $localizedData.AdapterExistsWithDifferentVlanMode
-            return $false
+            Write-Warning $localizedData.VMNetAdapterDoesNotExist
         }
-    } else {
-        throw $localizedData.VMNetAdapterDoesNotExist
+    }
+    catch {
+        Write-Error $_
     }
 }

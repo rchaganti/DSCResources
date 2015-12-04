@@ -23,9 +23,9 @@ ConvertFrom-StringData @'
 '@
 }
 
-if (Test-Path $PSScriptRoot\en-us)
+if (Test-Path "$PSScriptRoot\$PSCulture")
 {
-    Import-LocalizedData LocalizedData -filename cVMNetworkAdapter.psd1
+    Import-LocalizedData LocalizedData -filename "cVMNetworkAdapter.psd1" -BaseDirectory "$PSScriptRoot\$PSCulture"
 }
 
 Function Get-TargetResource {
@@ -33,16 +33,13 @@ Function Get-TargetResource {
 	[OutputType([System.Collections.Hashtable])]
     Param (
         [Parameter(Mandatory)]
-        [String] $Name,
+        [String] $Id,
 
         [Parameter(Mandatory)]
-        [String] $SwitchName,
+        [String] $Name,        
 
         [Parameter(Mandatory)]
-        [Bool] $ManagementOS,
-
-        [Parameter()]
-        [String] $VMName
+        [String] $SwitchName
     )
 
     $Configuration = @{
@@ -50,23 +47,8 @@ Function Get-TargetResource {
         SwitchName = $SwitchName
     }
 
-    if ($ManagementOS -and $VMName) {
-        throw $localizedData.VMNameAndManagementTogether
-    }
-
-    if ((-not $ManagementOS) -and (-not $VMName)) {
-        throw $localizedData.MustProvideVMName
-    }
-
     $Arguments = @{
         Name = $Name
-    }
-
-    if ($VMName) {
-        $Arguments.Add('VMName',$VMName)
-    } elseif ($ManagementOS) {
-        $Arguments.Add('ManagementOS', $true)
-        $Arguments.Add('SwitchName', $SwitchName)
     }
 
     Write-Verbose $localizedData.GetVMNetAdapter
@@ -96,13 +78,16 @@ Function Set-TargetResource {
     [CmdletBinding()]
     Param (
         [Parameter(Mandatory)]
+        [String] $Id,
+        
+        [Parameter(Mandatory)]
         [String] $Name,
 
         [Parameter(Mandatory)]
         [String] $SwitchName,
 
-        [Parameter(Mandatory)]
-        [Bool] $ManagementOS,
+        [Parameter()]
+        [Bool] $ManagementOS=$true,
 
         [Parameter()]
         [String] $VMName,
@@ -192,13 +177,16 @@ Function Test-TargetResource {
 	[OutputType([System.Boolean])]
     Param (
         [Parameter(Mandatory)]
+        [String] $Id,
+                
+        [Parameter(Mandatory)]
         [String] $Name,
 
         [Parameter(Mandatory)]
         [String] $SwitchName,
 
-        [Parameter(Mandatory)]
-        [Bool] $ManagementOS,
+        [Parameter()]
+        [Bool] $ManagementOS=$true,
 
         [Parameter()]
         [String] $VMName,
