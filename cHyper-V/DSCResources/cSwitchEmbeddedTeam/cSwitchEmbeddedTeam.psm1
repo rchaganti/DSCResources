@@ -88,6 +88,7 @@ function Set-TargetResource
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
+        [ValidateLength(1,8)]
 		[String[]]$NetAdapterName,
 
 		[Parameter()]
@@ -238,6 +239,7 @@ function Test-TargetResource
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
+        [ValidateLength(1,8)]
 		[String[]]$NetAdapterName,
 
 		[Parameter()]
