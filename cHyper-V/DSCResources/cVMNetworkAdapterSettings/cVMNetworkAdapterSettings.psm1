@@ -78,7 +78,7 @@ Function Set-TargetResource {
         [String] $SwitchName,
 
         [Parameter()]
-        [Bool] $ManagementOS = $true,
+        [Bool] $ManagementOS,
 
         [Parameter()]
         [String] $VMName,
@@ -178,7 +178,7 @@ Function Test-TargetResource {
         [String] $SwitchName,
 
         [Parameter()]
-        [Bool] $ManagementOS = $true,
+        [Bool] $ManagementOS,
 
         [Parameter()]
         [String] $VMName,
