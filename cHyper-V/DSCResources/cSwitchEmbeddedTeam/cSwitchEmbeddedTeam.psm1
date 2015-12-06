@@ -3,6 +3,7 @@ DATA localizedData
 {
     # same as culture = "en-US"
 ConvertFrom-StringData @'    
+    PacketDirectMustUseHyperVPort=Using Enable Packet Redirect on the SET team must use Hyper-V Port mode as the load balancing algorightm. This will reset the LB mode.
     NoHyperVModule=Hyper-V PowerShell Module not found.
     CheckSETMembers=Checking if SET network adapter members match or not.
     TeamMembersUpdate=SET Network Adapter members mismatch. This will be updated.
@@ -193,6 +194,11 @@ function Set-TargetResource
                 NetAdapterName = $NetAdapterName
                 AllowManagementOS = $AllowManagementOS
                 EnablePacketDirect = $EnablePacketDirect
+            }
+            
+            if ($EnablePacketDirect -and ($LoadBalancingAlgorithm -ne 'HyperVPort') {
+                Write-Warning $localizedData.PacketDirectMustUseHyperVPort
+                $LoadBalancingAlgorithm = 'HyperVPort'
             }
 
             if ($NetAdapterName.Length -eq 1) {
