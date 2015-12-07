@@ -49,7 +49,7 @@ Here is how you use this resource.
         Ensure = 'Present' 
     }
 
-####Using cVMSwitch resource####
+####Using cNatSwitch resource####
 This DSC resource can be used to deploy NAT configuration with Hyper-V VM switches. This works only with Server 2106 TP4 onwards.
 
 This is a very simple resource. It creates a VM switch of NAT type and configures a NAT on the management OS.
