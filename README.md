@@ -36,6 +36,7 @@ Custom DSC resource modules in this repository are packaged as different categor
 - Microsoft Hyper-V ([cHyper-V](https://github.com/rchaganti/DSCResources/tree/master/cHyper-V))
 	- [cVMSwitch](https://github.com/rchaganti/DSCResources/tree/master/cHyper-V/DSCResources/cVMSwitch) is used to create virtual machine switches.
 	- [cSwitchEmbeddedTeam](https://github.com/rchaganti/DSCResources/tree/master/cHyper-V/DSCResources/cSwitchEmbeddedTeam) is used to create switch embedded team VM switches on Server 2014 TP4 and above.
+	- [cNatSwitch](https://github.com/rchaganti/DSCResources/tree/master/cHyper-V/DSCResources/cNatSwitch) is used to deploy a VM switch of NAT type.
 	- [cVMNetworkAdapter](https://github.com/rchaganti/DSCResources/tree/master/cHyper-V/DSCResources/cVMNetworkAdapter) is used to create VM network adapters to attach to either management OS or the virtual machines.
 	- [cVMNetworkAdapterSettings](https://github.com/rchaganti/DSCResources/tree/master/cHyper-V/DSCResources/cVMNetworkAdapterSettings) is used to configure VM network adapter settings such as bandwidth weights, port mirroring, DHCP guard, MAC address spoofing, etc.
 	- [cVMNetworkAdapterVlan](https://github.com/rchaganti/DSCResources/tree/master/cHyper-V/DSCResources/cVMNetworkAdapterVlan) is used to configure VLANs on virtual network adapters either in the management OS or virtual machines.
@@ -46,4 +47,4 @@ These modules are available on [PowerShellGallery.com](https://www.powershellgal
     Install-Module -Name cWindowsOS
     Install-Module -Name cWMIPermanentEvents
     Install-Module -Name cMicrosoftAzureRecoveryServices
-    Install-Module -Name cMicrosoftAzureRecoveryServices
+    Install-Module -Name cHyper-V

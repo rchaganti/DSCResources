@@ -6,6 +6,7 @@ Microsoft Hyper-V DSC resource module contains a set of resources for managing H
 
 - [cVMSwitch](https://github.com/rchaganti/DSCResources/tree/master/cHyper-V/DSCResources/cVMSwitch) is used to create virtual machine switches.
 - [cSwitchEmbeddedTeam](https://github.com/rchaganti/DSCResources/tree/master/cHyper-V/DSCResources/cSwitchEmbeddedTeam) is used to create switch embedded team VM switches on Server 2014 TP4 and above.
+- [cNatSwitch](https://github.com/rchaganti/DSCResources/tree/master/cHyper-V/DSCResources/cNatSwitch) is used to deploy a VM switch of NAT type.
 - [cVMNetworkAdapter](https://github.com/rchaganti/DSCResources/tree/master/cHyper-V/DSCResources/cVMNetworkAdapter) is used to create VM network adapters to attach to either management OS or the virtual machines.
 - [cVMNetworkAdapterSettings](https://github.com/rchaganti/DSCResources/tree/master/cHyper-V/DSCResources/cVMNetworkAdapterSettings) is used to configure VM network adapter settings such as bandwidth weights, port mirroring, DHCP guard, MAC address spoofing, etc.
 - [cVMNetworkAdapterVlan](https://github.com/rchaganti/DSCResources/tree/master/cHyper-V/DSCResources/cVMNetworkAdapterVlan) is used to configure VLANs on virtual network adapters either in the management OS or virtual machines.
@@ -48,6 +49,25 @@ Here is how you use this resource.
         Ensure = 'Present' 
     }
 
+####Using cVMSwitch resource####
+This DSC resource can be used to deploy NAT configuration with Hyper-V VM switches. This works only with Server 2106 TP4 onwards.
+
+This is a very simple resource. It creates a VM switch of NAT type and configures a NAT on the management OS.
+
+![](http://i.imgur.com/yaFN6dT.png)
+The *Name* property identifies the name of the VM switch and the *NATSubnetAddress* properties identifies the address range that should be used for nat'ing.
+
+Here is how you use this resource.
+
+    Configuration NatDemo {
+    	Import-DscResource -ModuleName cHyper-V -Name cNatSwitch
+    	cNatSwitch NatDemo {
+    		Name = 'SQLNatConfig'
+    		NATSubnetAddress = '192.168.0.0/24'
+    		Ensure = 'Present'
+    	}
+    }
+ 
 ####Using cVMNetworkAdapter resource####
 This DSC resource can be used to attach network adapters to VM switches and add them to either management OS or virtual machines on the host.
 
