@@ -20,6 +20,8 @@ ConvertFrom-StringData @'
     VMNetAdapterDoesNotExistShouldAdd=VM Network Adapter does not exist. It will be added.
     VMNetAdapterExistsShouldRemove=VM Network Adapter Exists. It will be removed.
     VMNetAdapterDoesNotExistNoActionNeeded=VM Network adapter does not exist. No action needed.
+    SwitchIsDifferent=Net Adapter is not connected to the requested switch.
+    PerformSwitchConnect=Connecting VM Net adapter to the right switch.
 '@
 }
 
@@ -123,12 +125,11 @@ Function Set-TargetResource {
         $Arguments.Add('VMName',$VMName)
     } elseif ($ManagementOS) {
         $Arguments.Add('ManagementOS', $true)
-        $Arguments.Add('SwitchName', $SwitchName)
     }
     
     Write-Verbose $localizedData.GetVMNetAdapter
     $NetAdapterExists = Get-VMNetworkAdapter @Arguments -ErrorAction SilentlyContinue
-
+    $Arguments.Add('SwitchName',$SwitchName)
     if ($Ensure -eq 'Present') {
         if ($NetAdapterExists) {
             Write-Verbose $localizedData.FoundVMNetAdapter
@@ -143,13 +144,14 @@ Function Set-TargetResource {
                         Write-Verbose $localizedData.EnableDynamicMacAddress
                         $SetArguments.Add('DynamicMacAddress',$true)
                     }
-                } else {
-                    if ($StaticMacAddress) {
-                        if ($StaticMacAddress -ne $NetAdapterExists.MacAddress) {
-                            Write-Verbose $localizedData.EnableStaticMacAddress
-                            $SetArguments.Add('StaticMacAddress', $StaticMacAddress)
-                        }
+                } elseif ($StaticMacAddress) {
+                    if ($StaticMacAddress -ne $NetAdapterExists.MacAddress) {
+                        Write-Verbose $localizedData.EnableStaticMacAddress
+                        $SetArguments.Add('StaticMacAddress', $StaticMacAddress)
                     }
+                } elseif ($NetAdapterExists.SwitchName -ne $SwitchName) {
+                    Write-Verbose $localizedData.PerformSwitchConnect
+                    Connect-VMNetworkAdapter -VMNetworkAdapter $NetAdapterExists -SwitchName $SwitchName -Verbose
                 }
                 
                 Write-Verbose $localizedData.PerformVMNetModify
@@ -222,12 +224,11 @@ Function Test-TargetResource {
         $Arguments.Add('VMName',$VMName)
     } elseif ($ManagementOS) {
         $Arguments.Add('ManagementOS', $true)
-        $Arguments.Add('SwitchName', $SwitchName)
     }
 
     Write-Verbose $localizedData.GetVMNetAdapter
     $AdapterExists = Get-VMNetworkAdapter @Arguments -ErrorAction SilentlyContinue
-
+    $Arguments.Add('SwitchName', $SwitchName)
     if ($Ensure -eq 'Present') {
         if ($AdapterExists) {
             if (-not ($ManagementOS)) {
@@ -247,7 +248,11 @@ Function Test-TargetResource {
                         Write-Verbose $localizedData.EnableStaticMacAddress
                         return $false
                     }
-                } else {
+                } elseif ($AdapterExists.SwitchName -ne $SwitchName) {
+                    Write-Verbose $localizedData.SwitchIsDifferent
+                    return $false
+                } 
+                else {
                     Write-Verbose $localizedData.VMNetAdapterExistsNoActionNeeded
                     return $true
                 }

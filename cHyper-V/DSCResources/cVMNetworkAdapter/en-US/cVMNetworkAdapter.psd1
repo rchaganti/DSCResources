@@ -16,4 +16,6 @@ ConvertFrom-StringData @'
     VMNetAdapterDoesNotExistShouldAdd=VM Network Adapter does not exist. It will be added.
     VMNetAdapterExistsShouldRemove=VM Network Adapter Exists. It will be removed.
     VMNetAdapterDoesNotExistNoActionNeeded=VM Network adapter does not exist. No action needed.
+    SwitchIsDifferent=Net Adapter is not connected to the requested switch.
+    PerformSwitchConnect=Connecting VM Net adapter to the right switch.
 '@

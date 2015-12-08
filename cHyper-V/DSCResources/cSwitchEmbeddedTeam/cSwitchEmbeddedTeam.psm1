@@ -105,7 +105,7 @@ function Set-TargetResource
 		[String]$TeamingMode='SwitchIndependent',
 
 		[parameter()]
-		[ValidateSet('HyperVPort','Dynamic')]
+		[ValidateSet('Dynamic','HyperVPort')]
         [String]$LoadBalancingAlgorithm='Dynamic',
 
         [Parameter()]
@@ -197,7 +197,7 @@ function Set-TargetResource
                 EnablePacketDirect = $EnablePacketDirect
             }
             
-            if ($EnablePacketDirect -and ($LoadBalancingAlgorithm -ne 'HyperVPort') {
+            if ($EnablePacketDirect -and ($LoadBalancingAlgorithm -ne 'HyperVPort')) {
                 Write-Warning $localizedData.PacketDirectMustUseHyperVPort
                 $LoadBalancingAlgorithm = 'HyperVPort'
             }
@@ -256,7 +256,7 @@ function Test-TargetResource
 		[String]$TeamingMode='SwitchIndependent',
 
 		[parameter()]
-		[ValidateSet('HyperVPort','Dynamic')]
+		[ValidateSet('Dynamic','HyperVPort')]
         [String]$LoadBalancingAlgorithm='Dynamic',
 
         [Parameter()]

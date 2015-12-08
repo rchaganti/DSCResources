@@ -89,13 +89,14 @@ Here is an example of how you use this DSC resource.
 ####Using cVMNetworkAdapterVlan resource####
 This DSC resource can be used to assign VLAN information to a NIC that is created attached to either the management OS or a virtual machine. There are several possibilities here.
 
-![](http://www.powershellmagazine.com/wp-content/uploads/2015/01/cVMNetworkAdapterVlan-1-1024x278.png)
+![](http://i.imgur.com/coUmOKg.png)
 
-When configuring the VLAN settings for a VM network adapter, you must specify the Name of the adapter and whether that belongs to *ManagementOS* or not. If the VM adapter belongs to a VM, you should specify a VM name using the *VMName* property. The *AdapterMode* property specifies the operation mode of the adapter and is by default set to *Untagged* which means there is not VLAN configuration. The possible and valid values for this property are *Untagged*, *Access*, *Trunk*, *Community*, *Isolated*, and *Promiscuous*. Each of these modes have a corresponding VLAN property that is mandatory. For example, if you set the *AdapterMode* property to Access, then it is mandatory to provide *VlanId* property. Similarly, if you set the *AdapterMode* to Trunk, the *NativeVlanId* property must be specified.
+This resource has two mandatory property. The Id property is just a unique identifier to differentiate between multiple VMs containing the same network adapter name. You must also specify the Name of the adapter and whether that belongs to *ManagementOS* or not. If the VM adapter belongs to a VM, you should specify a VM name using the *VMName* property. The *AdapterMode* property specifies the operation mode of the adapter and is by default set to *Untagged* which means there is not VLAN configuration. The possible and valid values for this property are *Untagged*, *Access*, *Trunk*, *Community*, *Isolated*, and *Promiscuous*. Each of these modes have a corresponding VLAN property that is mandatory. For example, if you set the *AdapterMode* property to Access, then it is mandatory to provide *VlanId* property. Similarly, if you set the *AdapterMode* to Trunk, the *NativeVlanId* property must be specified.
 
 Here is a sample configuration script that shows cNetworkAdapterVlan resource in action.
 
     cVMNetworkAdapterVlan HostSwitchVlan {
+       Id = ([guid]::NewGuid()).guid
        Name = 'HostSwitch'
        ManagementOS = $true
        AdapterMode = 'Access'
@@ -106,9 +107,9 @@ Here is a sample configuration script that shows cNetworkAdapterVlan resource in
 ####Using cVMNetworkAdapterSettings resource####
 Once the VM network adapters are created, we can assign the bandwidth reservation or priority settings as needed. Since we set the MinimumBandwidthMode to Weight during VM switch creation, we need to specify the percentage of bandwidth reservation for each adapter.  We use cVMNetworkAdapterSettings DSC resource for this purpose. This DSC resource can used for many other settings such as DhcpGuard, RouterGuard and so on.
 
-![](http://www.powershellmagazine.com/wp-content/uploads/2015/01/cVMNetworkAdapterSettings-1.png)
+![](http://i.imgur.com/eaG6bl7.png)
 
-There are two mandatory properties similar to the cVMNetworkAdapter DSC resource. You must specify the *Name* and *SwitchName* properties. The *ManagementOS* and *VMName* properties are mutually exclusive.
+There are three mandatory properties in this DSC resource. You must specify the *Id*, *Name* and *SwitchName* properties. The *ManagementOS* and *VMName* properties are mutually exclusive. The Id property works in a similar way as the cVMNetworkAdapter or cVMNetworkAdapterVlan resources.
 
 The *MaximumBandwidth* property is used to specify the maximum bandwidth, in bits per second, for the virtual network adapter. The *MinimumBandwidthAbsolute* specifies the minimum bandwidth, in bits per second, for the virtual network adapter. By default, these properties are set to zero which means those parameters within the network adapter are disabled. The *MinimumBandwidthWeight* specifies the minimum bandwidth, in terms of relative weight, for the virtual network adapter. The weight describes how much bandwidth to provide to the virtual network adapter relative to other virtual network adapters connected to the same virtual switch.
 
@@ -117,6 +118,7 @@ If you want allow teaming of network adapters in the guest OS, you can set the *
 Here is a sample configuration using this resource.
 
     cVMNetworkAdapterSettings HostClusterSettings {
+       Id = ([guid]::NewGuid()).guid
        Name = 'HostCluster'
        SwitchName = 'HostSwitch'
        ManagementOS = $true
