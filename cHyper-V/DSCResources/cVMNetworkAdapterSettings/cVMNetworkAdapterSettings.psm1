@@ -32,7 +32,10 @@ Function Get-TargetResource {
         [String] $Name,
         
         [Parameter(Mandatory)]
-        [String] $SwitchName
+        [String] $SwitchName,
+
+        [Parameter(Mandatory)]
+        [String] $VMName
     )
 
     if(!(Get-Module -ListAvailable -Name Hyper-V))
@@ -47,6 +50,13 @@ Function Get-TargetResource {
 
     $Arguments = @{
         Name = $Name
+    }
+
+    if ($VMName -ne 'Management OS') {
+        $Arguments.Add('VMName',$VMName)
+    } else {
+        $Arguments.Add('ManagementOS', $true)
+        $Arguments.Add('SwitchName', $SwitchName)
     }
 
     Write-Verbose $localizedData.GetVMNetAdapter
@@ -65,7 +75,7 @@ Function Get-TargetResource {
         $Configuration.Add('IeeePriorityTag',$NetAdapter.IeeePriorityTag)
         $Configuration.Add('PortMirroring',$NetAdapter.PortMirroringMode)
     } else {
-        Write-Verbose $localizedData.NoVMNetAdapterFound
+        Write-Warning $localizedData.NoVMNetAdapterFound
     }
 
     $Configuration
@@ -83,10 +93,7 @@ Function Set-TargetResource {
         [Parameter(Mandatory)]
         [String] $SwitchName,
 
-        [Parameter()]
-        [Bool] $ManagementOS,
-
-        [Parameter()]
+        [Parameter(Mandatory)]
         [String] $VMName,
 
         [Parameter()]
@@ -133,21 +140,13 @@ Function Set-TargetResource {
         Throw $localizedData.HyperVModuleNotFound
     }
 
-    if ($VMName -and $ManagementOS) {
-        throw $localizedData.VMNameAndManagementTogether
-    }
-
-    if ((-not $ManagementOS) -and (-not $VMName)) {
-        throw $localizedData.MustProvideVMName
-    }
-
     $Arguments = @{
         Name = $Name
     }
 
-    if ($VMName) {
+    if ($VMName -ne 'Management OS') {
         $Arguments.Add('VMName',$VMName)
-    } elseif ($ManagementOS) {
+    } else {
         $Arguments.Add('ManagementOS', $true)
         $Arguments.Add('SwitchName', $SwitchName)
     }
@@ -186,10 +185,7 @@ Function Test-TargetResource {
         [Parameter(Mandatory)]
         [String] $SwitchName,
 
-        [Parameter()]
-        [Bool] $ManagementOS,
-
-        [Parameter()]
+        [Parameter(Mandatory)]
         [String] $VMName,
 
         [Parameter()]
@@ -236,21 +232,13 @@ Function Test-TargetResource {
         Throw $localizedData.HyperVModuleNotFound
     }
 
-    if ($VMName -and $ManagementOS) {
-        throw $localizedData.VMNameAndManagementTogether
-    }
-
-    if ((-not $ManagementOS) -and (-not $VMName)) {
-        throw $localizedData.MustProvideVMName
-    }
-
     $Arguments = @{
         Name = $Name
     }
 
-    if ($VMName) {
+    if ($VMName -ne 'Management OS') {
         $Arguments.Add('VMName',$VMName)
-    } elseif ($ManagementOS) {
+    } else {
         $Arguments.Add('ManagementOS', $true)
         $Arguments.Add('SwitchName', $SwitchName)
     }

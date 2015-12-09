@@ -71,9 +71,11 @@ Here is how you use this resource.
 ####Using cVMNetworkAdapter resource####
 This DSC resource can be used to attach network adapters to VM switches and add them to either management OS or virtual machines on the host.
 
-![](http://i.imgur.com/eQjUD9h.png)
+![](http://i.imgur.com/LeQGVRf.png)
 
-The Id property is the unique key within this DSC resource. This property isn't related to any VM network adapter configuration but instead used as a way to uniquely identify each VM network adapter resource in a configuration. In the previous version of this DSC resource, *Name* property was the key property. There it prevented creating network adapters with the same name and attach them to different VMs. This is a breaking change. The Name property and *SwitchName* property identify the name to be assigned to the VM network adapter and the name of the switch to attach to. The *ManagementOS* property identifies if the adapter should be added to the management OS instead of a VM. The *ManagementOS* and *VMName* properties are mutually exclusive. *VMName* property idenitifies the virtual machine to which the VM network adapter will be attached to. If you want to assign a static MAC address to the VM network adapter, you can use the *StaticMacAddress* property. To reset it back to a dynamic MAC address, simply remove the *StaticMacAddress* and configure the *DynamicMacAddress* to be $true.
+The Id property is the unique key within this DSC resource. This property isn't related to any VM network adapter configuration but instead used as a way to uniquely identify each VM network adapter resource in a configuration. In the previous version of this DSC resource, *Name* property was the key property. Having *Name* as the key property prevented creating network adapters with the same name and attach them to different VMs. This is a breaking change in this release. The *Name* property and *SwitchName* property identify the name to be assigned to the VM network adapter and the name of the switch to attach to. 
+
+In this release, there is another breaking change w.r.t the *ManagementOS* property. This property is removed and combined with VMName property. SO, if you need to add a network adapter to the management OS, specify *VMName* as 'Management OS'. If the value of *VMName* property is not 'Management OS', it will be considered a Virtual Machine configuration and a network adapter will be added to VM on the Hyper-V host. If you want to assign a static MAC address to the VM network adapter, you can use the *StaticMacAddress* property. To reset it back to a dynamic MAC address, simply remove the *StaticMacAddress* and configure the *DynamicMacAddress* to be $true.
 
 Here is an example of how you use this DSC resource.
 
@@ -81,7 +83,7 @@ Here is an example of how you use this DSC resource.
     	Id = ([guid]::NewGuid()).guid
     	Name = 'DemoAdapter'
     	SwitchName = 'DemoSwitch'
-    	ManagementOS = $true
+    	VMName = 'Management OS'
     	Ensure = 'Present'
     	DependsOn = "[cVMSwitch]DemoSwitch"
     }
@@ -89,16 +91,20 @@ Here is an example of how you use this DSC resource.
 ####Using cVMNetworkAdapterVlan resource####
 This DSC resource can be used to assign VLAN information to a NIC that is created attached to either the management OS or a virtual machine. There are several possibilities here.
 
-![](http://i.imgur.com/coUmOKg.png)
+![](http://i.imgur.com/JVAdXgF.png)
 
-This resource has two mandatory property. The Id property is just a unique identifier to differentiate between multiple VMs containing the same network adapter name. You must also specify the Name of the adapter and whether that belongs to *ManagementOS* or not. If the VM adapter belongs to a VM, you should specify a VM name using the *VMName* property. The *AdapterMode* property specifies the operation mode of the adapter and is by default set to *Untagged* which means there is not VLAN configuration. The possible and valid values for this property are *Untagged*, *Access*, *Trunk*, *Community*, *Isolated*, and *Promiscuous*. Each of these modes have a corresponding VLAN property that is mandatory. For example, if you set the *AdapterMode* property to Access, then it is mandatory to provide *VlanId* property. Similarly, if you set the *AdapterMode* to Trunk, the *NativeVlanId* property must be specified.
+This resource has two mandatory property. The Id property is just a unique identifier to differentiate between multiple VMs containing the same network adapter name. 
+
+In this release, there is another breaking change w.r.t the *ManagementOS* property. This property is removed and combined with VMName property. SO, if you need to add a network adapter to the management OS, specify *VMName* as 'Management OS'. If the value of *VMName* property is not 'Management OS', it will be considered a Virtual Machine configuration and the network adapter attached to the VM will be configured for VLAN settings. 
+
+The *AdapterMode* property specifies the operation mode of the adapter and is by default set to *Untagged* which means there is not VLAN configuration. The possible and valid values for this property are *Untagged*, *Access*, *Trunk*, *Community*, *Isolated*, and *Promiscuous*. Each of these modes have a corresponding VLAN property that is mandatory. For example, if you set the *AdapterMode* property to Access, then it is mandatory to provide *VlanId* property. Similarly, if you set the *AdapterMode* to Trunk, the *NativeVlanId* property must be specified.
 
 Here is a sample configuration script that shows cNetworkAdapterVlan resource in action.
 
     cVMNetworkAdapterVlan HostSwitchVlan {
        Id = ([guid]::NewGuid()).guid
        Name = 'HostSwitch'
-       ManagementOS = $true
+       VMName = 'Management OS'
        AdapterMode = 'Access'
        VlanId = 10
        DependsOn = '[cVMSwitch]HostSwitch'
@@ -107,9 +113,11 @@ Here is a sample configuration script that shows cNetworkAdapterVlan resource in
 ####Using cVMNetworkAdapterSettings resource####
 Once the VM network adapters are created, we can assign the bandwidth reservation or priority settings as needed. Since we set the MinimumBandwidthMode to Weight during VM switch creation, we need to specify the percentage of bandwidth reservation for each adapter.  We use cVMNetworkAdapterSettings DSC resource for this purpose. This DSC resource can used for many other settings such as DhcpGuard, RouterGuard and so on.
 
-![](http://i.imgur.com/eaG6bl7.png)
+![](http://i.imgur.com/tZ1d4Fv.png)
 
-There are three mandatory properties in this DSC resource. You must specify the *Id*, *Name* and *SwitchName* properties. The *ManagementOS* and *VMName* properties are mutually exclusive. The Id property works in a similar way as the cVMNetworkAdapter or cVMNetworkAdapterVlan resources.
+There are three mandatory properties in this DSC resource. You must specify the *Name* and *SwitchName* properties.
+
+In this release, there is another breaking change w.r.t the *ManagementOS* property. This property is removed and combined with VMName property. SO, if you need to add a network adapter to the management OS, specify *VMName* as 'Management OS'. If the value of *VMName* property is not 'Management OS', it will be considered a Virtual Machine configuration and the network adapter attached to the VM will be configured for specified settings. 
 
 The *MaximumBandwidth* property is used to specify the maximum bandwidth, in bits per second, for the virtual network adapter. The *MinimumBandwidthAbsolute* specifies the minimum bandwidth, in bits per second, for the virtual network adapter. By default, these properties are set to zero which means those parameters within the network adapter are disabled. The *MinimumBandwidthWeight* specifies the minimum bandwidth, in terms of relative weight, for the virtual network adapter. The weight describes how much bandwidth to provide to the virtual network adapter relative to other virtual network adapters connected to the same virtual switch.
 
@@ -121,7 +129,7 @@ Here is a sample configuration using this resource.
        Id = ([guid]::NewGuid()).guid
        Name = 'HostCluster'
        SwitchName = 'HostSwitch'
-       ManagementOS = $true
+       VMName = 'Management OS'
        MinimumBandwidthWeight = 10
        DependsOn = '[cVMSwitch]HostSwitch','[cVMNetworkAdapter]HostCluster'
     }

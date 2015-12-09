@@ -39,7 +39,10 @@ Function Get-TargetResource {
         [String] $Id,
         
         [Parameter(Mandatory)]
-        [String] $Name
+        [String] $Name,
+        
+        [Parameter(Mandatory)]
+        [String] $VMName        
     )
 
     if(!(Get-Module -ListAvailable -Name Hyper-V))
@@ -51,14 +54,23 @@ Function Get-TargetResource {
         Name = $Name
     }
 
-    Write-Verbose $localizedData.GetVMNetAdapter
+    if ($VMName -ne 'Management OS') {
+        $Arguments.Add('VMName',$VMName)
+    } else {
+        $Arguments.Add('ManagementOS', $true)
+    }
+
     try {
-        $AdapterExists = Get-VMNetworkAdapter @Arguments -ErrorAction Stop
+        Write-Verbose $localizedData.GetVMNetAdapter
+        $AdapterExists = Get-VMNetworkAdapter @Arguments -ErrorAction SilentlyContinue
 
         if ($AdapterExists) {
             Write-Verbose $localizedData.FoundVMNetAdapter
-            $Configuration = $Arguments
-            $Configuration.Remove('Name')
+            $Configuration = @{
+                'Name' = $Name
+                'VMName' = $VMName
+            }
+            #$Configuration.Remove('Name')
             $Configuration.Add('AdapterMode',$AdapterExists.VlanSetting.OperationMode)
             $Configuration.Add('VlanId',$AdapterExists.VlanSetting.AccessVlanId)
             $Configuration.Add('NativeVlanId',$AdapterExists.VlanSetting.NativeVlanId)
@@ -67,7 +79,6 @@ Function Get-TargetResource {
             $Configuration.Add('SecondaryVlanIdList',$AdapterExists.VlanSetting.SecondaryVlanIdListString)
             $Configuration.Add('AllowedVlanIdList',$AdapterExists.VlanSetting.AllowedVlanIdListString)
         }
-
         $Configuration
     } 
     catch {
@@ -84,10 +95,7 @@ Function Set-TargetResource {
         [Parameter(Mandatory)]
         [String] $Name,
 
-        [Parameter()]
-        [Bool] $ManagementOS,
-
-        [Parameter()]
+        [Parameter(Mandatory)]
         [String] $VMName,
 
         [Parameter()]
@@ -118,27 +126,19 @@ Function Set-TargetResource {
         Throw $localizedData.HyperVModuleNotFound
     }
 
-    if ($VMName -and $ManagementOS) {
-        throw $localizedData.VMNameAndManagementTogether
-    }
-
-    if ((-not $ManagementOS) -and (-not $VMName)) {
-        throw $localizedData.MustProvideVMName
-    }
-
     $Arguments = @{
         Name = $Name
     }
 
-    if ($VMName) {
+    if ($VMName -ne 'Management OS') {
         $Arguments.Add('VMName',$VMName)
-    } elseif ($ManagementOS) {
+    } else {
         $Arguments.Add('ManagementOS', $true)
     }
 
     try {
         Write-Verbose $localizedData.GetVMNetAdapter
-        $AdapterExists = Get-VMNetworkAdapter @Arguments -ErrorAction Stop
+        $AdapterExists = Get-VMNetworkAdapter @Arguments -ErrorAction SilentlyContinue
         if ($AdapterExists) {
             Write-Verbose $localizedData.FoundVMNetAdapter
             $SetArguments = $Arguments
@@ -192,10 +192,12 @@ Function Set-TargetResource {
                     break
                 }
             }
+            Write-Verbose $localizedData.PerformVMVlanSet
+            Set-VMNetworkAdapterVlan @SetArguments -ErrorAction Stop
         }
-        
-        Write-Verbose $localizedData.PerformVMVlanSet
-        Set-VMNetworkAdapterVlan @SetArguments -ErrorAction Stop
+        else {
+            throw $localizedData.NoVMNetAdapterFound
+        }
     }
     catch {
         Write-Error $_
@@ -212,10 +214,7 @@ Function Test-TargetResource {
         [Parameter(Mandatory)]
         [String] $Name,
 
-        [Parameter()]
-        [Bool] $ManagementOS,
-
-        [Parameter()]
+        [Parameter(Mandatory)]
         [String] $VMName,
 
         [Parameter()]
@@ -246,21 +245,13 @@ Function Test-TargetResource {
         Throw $localizedData.HyperVModuleNotFound
     }
 
-    if ($VMName -and $ManagementOS) {
-        throw $localizedData.VMNameAndManagementTogether
-    }
-
-    if ((-not $ManagementOS) -and (-not $VMName)) {
-        throw $localizedData.MustProvideVMName
-    }
-
     $Arguments = @{
         Name = $Name
     }
 
-    if ($VMName) {
+    if ($VMName -ne 'Management OS') {
         $Arguments.Add('VMName',$VMName)
-    } elseif ($ManagementOS) {
+    } else {
         $Arguments.Add('ManagementOS', $true)
     }
     
@@ -312,7 +303,7 @@ Function Test-TargetResource {
         #There is a remote timing issue that occurs when VLAN is set just after creating a VM Adapter. This needs more investigation. Sleep until then.
         Start-Sleep -Seconds 10
         Write-Verbose $localizedData.GetVMNetAdapter
-        $AdapterExists = Get-VMNetworkAdapter @Arguments -ErrorAction Stop
+        $AdapterExists = Get-VMNetworkAdapter @Arguments -ErrorAction SilentlyContinue
     
         if ($AdapterExists) {
             Write-Verbose $localizedData.FoundVMNetAdapter
@@ -383,8 +374,9 @@ Function Test-TargetResource {
                 Write-Verbose $localizedData.AdapterExistsWithDifferentVlanMode
                 return $false
             }
-        } else {
-            Write-Warning $localizedData.VMNetAdapterDoesNotExist
+        }
+        else {
+            throw $localizedData.VMNetAdapterDoesNotExist
         }
     }
     catch {

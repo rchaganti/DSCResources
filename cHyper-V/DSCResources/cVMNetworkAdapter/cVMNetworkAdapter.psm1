@@ -41,16 +41,27 @@ Function Get-TargetResource {
         [String] $Name,        
 
         [Parameter(Mandatory)]
-        [String] $SwitchName
+        [String] $SwitchName,
+
+        [Parameter(Mandatory)]
+        [String] $VMName
     )
 
     $Configuration = @{
         Name = $Name
         SwitchName = $SwitchName
+        VMName = $VMName
     }
 
     $Arguments = @{
         Name = $Name
+    }
+
+    if ($VMName -ne 'Management OS') {
+        $Arguments.Add('VMName',$VMName)
+    } else {
+        $Arguments.Add('ManagementOS', $true)
+        $Arguments.Add('SwitchName', $SwitchName)
     }
 
     Write-Verbose $localizedData.GetVMNetAdapter
@@ -58,14 +69,11 @@ Function Get-TargetResource {
 
     if ($NetAdapter) {
         Write-Verbose $localizedData.FoundVMNetAdapter
-        if ($ManagementOS) {
-            $Configuration.Add('ManagementOS',$true)
-        } elseif ($VMName) {
-            $Configuration.Add('VMName',$VMName)
-        }
-        $Configuration.Add('DynamicMacAddress', $NetAdapter.DynamicMacAddressEnabled)
-        if (-not ($NetAdapter.DynamicMacAddressEnabled)) {
+        if ($VMName -eq 'Management OS') {
+            $Configuration.Add('StaticMacAddress', $NetAdapter.MacAddress)
+        } elseif ($NetAdapter.VMName) {
             $Configuration.Add('StaticMacAddress', $NetAdapter.MacAddress)   
+            $Configuration.Add('DynamicMacAddress', $NetAdapter.DynamicMacAddressEnabled)
         }
         $Configuration.Add('Ensure','Present')
     } else {
@@ -88,10 +96,7 @@ Function Set-TargetResource {
         [Parameter(Mandatory)]
         [String] $SwitchName,
 
-        [Parameter()]
-        [Bool] $ManagementOS=$true,
-
-        [Parameter()]
+        [Parameter(Mandatory)]
         [String] $VMName,
 
         [Parameter()]
@@ -105,14 +110,6 @@ Function Set-TargetResource {
         [String] $Ensure='Present'
     )
 
-    if ($VMName -and $ManagementOS) {
-        throw $localizedData.VMNameAndManagementTogether
-    }
-
-    if ((-not $ManagementOS) -and (-not $VMName)) {
-        throw $localizedData.MustProvideVMName
-    }
-
     if ($DynamicMacAddress -and $StaticMacAddress) {
         throw $localizedData.StaticAndDynamicTogether
     }
@@ -121,19 +118,20 @@ Function Set-TargetResource {
         Name = $Name
     }
 
-    if ($VMName) {
+    if ($VMName -ne 'Management OS') {
         $Arguments.Add('VMName',$VMName)
-    } elseif ($ManagementOS) {
+    } else {
         $Arguments.Add('ManagementOS', $true)
+        $Arguments.Add('SwitchName', $SwitchName)
     }
     
     Write-Verbose $localizedData.GetVMNetAdapter
     $NetAdapterExists = Get-VMNetworkAdapter @Arguments -ErrorAction SilentlyContinue
-    $Arguments.Add('SwitchName',$SwitchName)
+    
     if ($Ensure -eq 'Present') {
         if ($NetAdapterExists) {
             Write-Verbose $localizedData.FoundVMNetAdapter
-            if ((-not $ManagementOS)) {
+            if (($VMName -ne 'Management OS')) {
                 Write-Verbose $localizedData.ModifyVMNetAdapter
                 $SetArguments = @{
                     VMNetworkAdapter = $NetAdapterExists
@@ -151,7 +149,7 @@ Function Set-TargetResource {
                     }
                 } elseif ($NetAdapterExists.SwitchName -ne $SwitchName) {
                     Write-Verbose $localizedData.PerformSwitchConnect
-                    Connect-VMNetworkAdapter -VMNetworkAdapter $NetAdapterExists -SwitchName $SwitchName -Verbose
+                    Connect-VMNetworkAdapter -VMNetworkAdapter $NetAdapterExists -SwitchName $SwitchName -ErrorAction Stop -Verbose
                 }
                 
                 Write-Verbose $localizedData.PerformVMNetModify
@@ -160,10 +158,13 @@ Function Set-TargetResource {
                 Write-Verbose $localizedData.CannotChangeHostAdapterMacAddress
             }
         } else {
-            if ($DynamicMacAddress) {
-                $Arguments.Add('DynamicMacAddress',$true)
-            } elseif ($StaticMacAddress) {
-                $Arguments.Add('StaticMacAddress',$StaticMacAddress)
+            if ($VMName -ne 'Management OS') {
+                if ($DynamicMacAddress) {
+                    $Arguments.Add('DynamicMacAddress',$true)
+                } elseif ($StaticMacAddress) {
+                    $Arguments.Add('StaticMacAddress',$StaticMacAddress)
+                }
+                $Arguments.Add('SwitchName',$SwitchName)
             }
             Write-Verbose $localizedData.AddVMNetAdapter
             Add-VMNetworkAdapter @Arguments -ErrorAction Stop
@@ -187,10 +188,7 @@ Function Test-TargetResource {
         [Parameter(Mandatory)]
         [String] $SwitchName,
 
-        [Parameter()]
-        [Bool] $ManagementOS=$true,
-
-        [Parameter()]
+        [Parameter(Mandatory)]
         [String] $VMName,
 
         [Parameter()]
@@ -204,14 +202,6 @@ Function Test-TargetResource {
         [String] $Ensure='Present'
     )
 
-    if ($VMName -and $ManagementOS) {
-        throw $localizedData.VMNameAndManagementTogether
-    }
-
-    if ((-not $ManagementOS) -and (-not $VMName)) {
-        throw $localizedData.MustProvideVMName
-    }
-
     if ($DynamicMacAddress -and $StaticMacAddress) {
         throw $localizedData.StaticAndDynamicTogether
     }
@@ -220,18 +210,19 @@ Function Test-TargetResource {
         Name = $Name
     }
 
-    if ($VMName) {
+    if ($VMName -ne 'Management OS') {
         $Arguments.Add('VMName',$VMName)
-    } elseif ($ManagementOS) {
+    } else {
         $Arguments.Add('ManagementOS', $true)
+        $Arguments.Add('SwitchName', $SwitchName)
     }
-
+    
     Write-Verbose $localizedData.GetVMNetAdapter
-    $AdapterExists = Get-VMNetworkAdapter @Arguments -ErrorAction SilentlyContinue
-    $Arguments.Add('SwitchName', $SwitchName)
+    $NetAdapterExists = Get-VMNetworkAdapter @Arguments -ErrorAction SilentlyContinue
+
     if ($Ensure -eq 'Present') {
         if ($AdapterExists) {
-            if (-not ($ManagementOS)) {
+            if ($VMName -ne 'Management OS') {
                 if ($DynamicMacAddress) {
                     if ($AdapterExists.DynamicMacAddressEnabled) {
                         Write-Verbose $localizedData.VMNetAdapterExistsNoActionNeeded
