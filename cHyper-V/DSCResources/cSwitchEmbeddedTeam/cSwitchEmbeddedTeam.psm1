@@ -88,7 +88,7 @@ function Set-TargetResource
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [ValidateLength(1,8)]
+        [ValidateCount(1,8)]
 		[String[]]$NetAdapterName,
 
 		[Parameter()]
@@ -239,7 +239,7 @@ function Test-TargetResource
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [ValidateLength(1,8)]
+        [ValidateCount(1,8)]
 		[String[]]$NetAdapterName,
 
 		[Parameter()]
@@ -310,7 +310,7 @@ function Test-TargetResource
                         Write-Warning $localizedData.IOVcannotbeUpdated
 
                         #We cannot update this configuration once switch is created unless we destroy and re-create. Destroying is a good option. So, don't return false.
-                        return $true
+                        return $true    
                     }
                 } else {
                     Write-Verbose $localizedData.CheckSETReservationMode
