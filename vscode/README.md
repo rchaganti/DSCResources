@@ -8,6 +8,7 @@ This module contains a collection of DSC custom resources for installing VS Code
 At present, this DSC resource module includes 2 resources.
 - [vscodesetup](https://github.com/rchaganti/DSCResources/tree/master/vscode/DSCResources/vscodesetup) is used to install VS Code editor.
 - [vscodeextention](https://github.com/rchaganti/DSCResources/tree/master/vscode/DSCResources/vscodeextension) is used to manage VS Code extensions.
+ 
 Before you can use any of these resources in a configuration script, you must first import the vscode module or a specific resource from this module.
 
     Import-DscResource -Module vscode
