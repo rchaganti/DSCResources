@@ -5,8 +5,7 @@
 
 This module contains a collection of miscellaneous DSC custom and composite resources for some generic Windows OS configuration tasks. 
 
-At present, this DSC resource module includes 4 resources.
-- [cHostsFile](https://github.com/rchaganti/DSCResources/tree/master/cWindowsOS/DSCResources/cHostsFile) is used to manage Hosts file entries.
+At present, this DSC resource module includes 3 resources.
 - [cAutoAdminLogon](https://github.com/rchaganti/DSCResources/tree/master/cWindowsOS/DSCResources/cAutoAdminLogon) is used to add or remove auto administrator logon configuration. This is a composite resource.
 - [cLoopBackCheck](https://github.com/rchaganti/DSCResources/tree/master/cWindowsOS/DSCResources/cLoopBackCheck) is used to enable or disable Loopback Check registry setting for web servers such as SharePoint Front End servers. This is a composite resource.
 - [cDiskImage](https://github.com/rchaganti/DSCResources/tree/master/cWindowsOS/DSCResources/cDiskImage) is used to mount or dismount ISO images.
@@ -14,21 +13,8 @@ At present, this DSC resource module includes 4 resources.
 Before you can use any of these resources in a configuration script, you must first import the cWindowsOS module or a specific resource from this module.
 
     Import-DscResource -Module cWindowsOS
-    Import-DscResource -Module cWindowsOS -Name cHostsFile
+    Import-DscResource -Module cWindowsOS -Name cAutoAdminLogon
     Import-DscResource -Name cAutoAdminLogon
-
-####Using cHostsFile resource####
-The *cHostsFile* resource can used to manage the host file entries in Windows Operating System. This can be used to add or delete IPv4 and IPv6 hosts file entries.
-
-![](http://i.imgur.com/V0gbqRz.png)
-
-The *HostName* and *IPAddress* properties are both mandatory. This resource will check for this pair in the hosts file and then decide if it needs to be added or removed.
-
-    cHostsFile HostsDemo {
-        IPAddress = '10.10.10.1'
-        HostName = 'Test10'
-        Ensure = 'Present'
-    }
 
 ####Using cDiskImage resource####
 The *cDiskImage* resource can be used to mount or dismount ISO images on the target systems.

@@ -1,78 +1,49 @@
-﻿# Fallback message strings in en-US
-DATA localizedData
-{
-# same as culture = "en-US"
-ConvertFrom-StringData @'
-    GetMMAgentConfig=Retrieving MMAgent Configuration object.
-    GetManagementGroup=Getting Management Group.
-    ManagementGroupNotFound=Management Group not found.
-    ManagementGroupFound=Management group found.
-    ShouldUpdateManagementGroup=Management group configurtion will be updated.
-    ManagementGroupFoundNoActionNeeded=Management group found. No action needed.
-    ManagementGroupDoesnotExistMustCreate=Management group does not exist. It will be configured.
-    ManagementGroupFoundMustDelete=Management group found. It will be removed.
-    ManagementGroupNotFoundNoActionNeeded=Management group not found. No action needed.
-    UpdateActionAccount=Action account Credentials will be updated.
-    UpdateActionAccountComplete=Action Account Credentials updated.
-    ActionAccountNotSpecified=Action Account credentials must be specified when setting Force property to True.
-    AnErrorOccurred=An error occurred while working with management group.
-    InnerException=Nested error during management group configuration.
-    AddingManagementGroup=Adding Management Group configuration.
-    AddedManagementGroup=Added Management Group configuration.
-    RemovingManagementGroup=Removing Management Group Configuration.
-    RemovedManagementGroup=Removed Management Group Configuration.
-'@
-}
-
-if (Test-Path $PSScriptRoot\en-us)
-{
-    Import-LocalizedData LocalizedData -filename cMMAgentManagementGroups.psd1
-}
+﻿Import-LocalizedData -BindingVariable localizedData -filename cMMAgentManagementGroups.psd1 -BaseDirectory $PSScriptRoot -Verbose
 
 function Get-TargetResource
 {
     [OutputType([Hashtable])]
     param (
         [Parameter(Mandatory)]
-        [String] $managementGroupName,
+        [String] $ManagementGroupName,
 
         [Parameter(Mandatory)]
-        [String] $managementServerName
+        [String] $ManagementServerName
     )
     
-    $Configuration = @{
-        managementGroupName = $managementGroupName
-        managementServerName = $managementServerName
+    $configuration = @{
+        managementGroupName = $ManagementGroupName
+        managementServerName = $ManagementServerName
     }
 
     try {
         Write-Verbose $localizedData.GetMMAgentConfig
-        $MMAgentConfig = New-Object -ComObject 'AgentConfigManager.MgmtSvcCfg'
+        $mmAgentConfig = New-Object -ComObject 'AgentConfigManager.MgmtSvcCfg'
 
         #This try-catch is a workaround for the COM method failure when the specified group does not exist
         try {
             Write-Verbose $localizedData.GetManagementGroup
-            $ManagementGroup = $MMAgentConfig.GetManagementGroup($managementGroupName)
+            $managementGroup = $mmAgentConfig.GetManagementGroup($ManagementGroupName)
         }
         catch {
             Write-Verbose $localizedData.ManagementGroupNotFound
-            $Configuration.Add('Ensure','Absent')
+            $configuration.Add('Ensure','Absent')
         }
 
-        if ($ManagementGroup) {
+        if ($managementGroup) {
             Write-Verbose $localizedData.ManagementGroupFound
-            $Configuration.Add('Ensure','Present')
+            $configuration.Add('Ensure','Present')
         }
-        return $Configuration
+        return $configuration
     }
 
     catch {
         $exception = $_    
-        Write-Verbose ($LocalizedData.AnErrorOccurred -f $exception.message)
+        Write-Verbose ($localizedData.AnErrorOccurred -f $exception.message)
         while ($exception.InnerException -ne $null)
         {
             $exception = $exception.InnerException
-            Write-Verbose ($LocalizedData.InnerException -f $exception.message)
+            Write-Verbose ($localizedData.InnerException -f $exception.message)
         }        
     }
 }

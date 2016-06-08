@@ -14,7 +14,6 @@ Custom DSC resource modules in this repository are packaged as different categor
 	- [cWMISMTPConsumer](https://github.com/rchaganti/DSCResources/tree/master/cWMIPermanentEvents/DSCResources/cWMISMTPConsumer) is used to create an instance of WMI SMTP Consumer that sends an email in response to an event.
 
 - Windows OS Miscellaneous Module ([cWindowsOS](https://github.com/rchaganti/DSCResources/tree/master/cWindowsOS))
-	- [cHostsFile](https://github.com/rchaganti/DSCResources/tree/master/cWindowsOS/DSCResources/cHostsFile) is used to manage Hosts file entries.
 	- [cAutoAdminLogon](https://github.com/rchaganti/DSCResources/tree/master/cWindowsOS/DSCResources/cAutoAdminLogon) is used to add or remove auto administrator logon configuration. This is a composite resource.
 	- [cLoopBackCheck](https://github.com/rchaganti/DSCResources/tree/master/cWindowsOS/DSCResources/cLoopBackCheck) is used to enable or disable Loopback Check registry setting for web servers such as SharePoint Front End servers. This is a composite resource.
 	- c[DiskImage](https://github.com/rchaganti/DSCResources/tree/master/cWindowsOS/DSCResources/cDiskImage) is used to mount or dismount ISO images.
@@ -41,6 +40,10 @@ Custom DSC resource modules in this repository are packaged as different categor
 	- [cVMNetworkAdapterSettings](https://github.com/rchaganti/DSCResources/tree/master/cHyper-V/DSCResources/cVMNetworkAdapterSettings) is used to configure VM network adapter settings such as bandwidth weights, port mirroring, DHCP guard, MAC address spoofing, etc.
 	- [cVMNetworkAdapterVlan](https://github.com/rchaganti/DSCResources/tree/master/cHyper-V/DSCResources/cVMNetworkAdapterVlan) is used to configure VLANs on virtual network adapters either in the management OS or virtual machines.
 
+- Microsoft Visual Studio Code ([cHyper-V](https://github.com/rchaganti/DSCResources/tree/master/vscode))
+	- [vscodesetup](https://github.com/rchaganti/DSCResources/tree/master/vscode/DSCResources/vscodesetup) is used to install Visual Studio Code.
+	- [vscodeextension](https://github.com/rchaganti/DSCResources/tree/master/vscode/DSCResources/vscodeextension) is used to install VS code extensions from the marketplace.
+
 These modules are available on [PowerShellGallery.com](https://www.powershellgallery.com). If you are using Windows PowerShell 5.0 or Packagemanagement module on PowerShell 4.0, you can install these modules using PowerShellGet module.
 
     Install-Module -Name cMMAgent
@@ -48,3 +51,4 @@ These modules are available on [PowerShellGallery.com](https://www.powershellgal
     Install-Module -Name cWMIPermanentEvents
     Install-Module -Name cMicrosoftAzureRecoveryServices
     Install-Module -Name cHyper-V
+	Install-Module -Name vscode

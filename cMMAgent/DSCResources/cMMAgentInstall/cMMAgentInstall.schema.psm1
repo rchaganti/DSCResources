@@ -15,24 +15,24 @@
     )
     
     if ($Ensure -eq 'Absent') {
-        $CommandLineArguments = '/Q /C:"MsiExec.exe /x{E854571C-3C01-4128-99B8-52512F44E5E9} /qn /norestart"'
+        $commandLineArguments = '/Q /C:"MsiExec.exe /x{E854571C-3C01-4128-99B8-52512F44E5E9} /qn /norestart"'
         Package MMAgentSetup {
             Name = 'Microsoft Monitoring Agent'
             ProductId = 'EB03FA06-01A7-49F7-8BD0-0AB92D905899'
             Path = $Path
-            Arguments = $CommandLineArguments
+            Arguments = $commandLineArguments
             Ensure = 'Absent'
         }
     } else {
-        $CommandLineArguments = '/Q /C:"setup.exe /qn ADD_OPINSIGHTS_WORKSPACE=1 AcceptEndUserLicenseAgreement=1 '
-        $CommandLineArguments += "OPINSIGHTS_WORKSPACE_ID=$WorkspaceID "
-        $CommandLineArguments += "OPINSIGHTS_WORKSPACE_KEY=$WorkspaceKey`""
+        $commandLineArguments = '/Q /C:"setup.exe /qn ADD_OPINSIGHTS_WORKSPACE=1 AcceptEndUserLicenseAgreement=1 '
+        $commandLineArguments += "OPINSIGHTS_WORKSPACE_ID=$WorkspaceID "
+        $commandLineArguments += "OPINSIGHTS_WORKSPACE_KEY=$WorkspaceKey`""
 
         Package MMAgentSetup {
             Name = 'Microsoft Monitoring Agent'
             ProductId = 'E854571C-3C01-4128-99B8-52512F44E5E9'
             Path = $Path
-            Arguments = $CommandLineArguments
+            Arguments = $commandLineArguments
             Ensure = 'Present'
         }
     }
