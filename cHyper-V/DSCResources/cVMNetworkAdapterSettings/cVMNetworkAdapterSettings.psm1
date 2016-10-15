@@ -117,6 +117,10 @@ Function Set-TargetResource {
         [String] $AllowTeaming = 'Off',
 
         [Parameter()]
+        [ValidateSet('On','Off')]
+        [String] $DeviceNaming = 'On',
+
+        [Parameter()]
         [uint64] $MaximumBandwidth = 0,
 
         [Parameter()]
@@ -166,6 +170,7 @@ Function Set-TargetResource {
         IeeePriorityTag = $IeeePriorityTag
         AllowTeaming = $AllowTeaming
         PortMirroring = $PortMirroring
+        DeviceNaming = $DeviceNaming
     }
     
     Write-Verbose $localizedData.PerformVMNetModify
@@ -207,6 +212,10 @@ Function Test-TargetResource {
         [Parameter()]
         [ValidateSet('On','Off')]
         [String] $AllowTeaming = 'Off',
+
+        [Parameter()]
+        [ValidateSet('On','Off')]
+        [String] $DeviceNaming = 'On',
 
         [Parameter()]
         [uint64] $MaximumBandwidth = 0,
@@ -257,7 +266,8 @@ Function Test-TargetResource {
             -and $AdapterExists.BandwidthSetting.MinimumBandwidthWeight -eq $MinimumBandwidthWeight `
             -and $AdapterExists.BandwidthSetting.MinimumBandwidthAbsolute -eq $MinimumBandwidthAbsolute `
             -and $AdapterExists.VMQWeight -eq $VMQWeight `
-            -and $AdapterExists.PortMirroringMode -eq $PortMirroring
+            -and $AdapterExists.PortMirroringMode -eq $PortMirroring `
+            -and $AdapterExists.DeviceNaming -eq $DeviceNaming
         ) {
             Write-Verbose $localizedData.VMNetAdapterExistsNoActionNeeded
             return $true
