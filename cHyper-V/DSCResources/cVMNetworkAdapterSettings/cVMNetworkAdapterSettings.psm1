@@ -1,29 +1,21 @@
-﻿# Fallback message strings in en-US
-DATA localizedData
+﻿#region localizeddata
+if (Test-Path "${PSScriptRoot}\${PSUICulture}")
 {
-    # same as culture = "en-US"
-ConvertFrom-StringData @'    
-    HyperVModuleNotFound=Hyper-V PowerShell Module not found.
-    VMNameAndManagementTogether=VMName cannot be provided when ManagementOS is set to True.
-    MustProvideVMName=Must provide VMName parameter when ManagementOS is set to False.
-    GetVMNetAdapter=Getting VM Network Adapter information.
-    FoundVMNetAdapter=Found VM Network Adapter.
-    NoVMNetAdapterFound=No VM Network Adapter found.
-    PerformVMNetModify=Performing VM Network Adapter configuration changes.
-    VMNetAdapterExistsNoActionNeeded=VM Network Adapter exists with requested configuration. No action needed.
-    VMNetAdapterDoesNotExist=VM Network adapter does not exist.
-    VMNetAdapterExistsWithDifferentConfiguration=VM Network Adapter exists but different configuration. This will be fixed.
-'@
-}
-
-if (Test-Path "$PSScriptRoot\$PSCulture")
+    Import-LocalizedData -BindingVariable LocalizedData -filename cVMNetworkAdapterSettings.psd1 `
+                         -BaseDirectory "${PSScriptRoot}\${PSUICulture}"
+} 
+else
 {
-    Import-LocalizedData LocalizedData -filename "cVMNetworkAdapterSettings.psd1" -BaseDirectory "$PSScriptRoot\$PSCulture"
+    #fallback to en-US
+    Import-LocalizedData -BindingVariable LocalizedData -filename cVMNetworkAdapterSettings.psd1 `
+                         -BaseDirectory "${PSScriptRoot}\en-US"
 }
+#endregion
 
-Function Get-TargetResource {
-	[CmdletBinding()]
-	[OutputType([System.Collections.Hashtable])]
+Function Get-TargetResource
+{
+    [CmdletBinding()]
+    [OutputType([System.Collections.Hashtable])]
     Param (
         [Parameter(Mandatory)]
         [String] $Id,
@@ -52,9 +44,12 @@ Function Get-TargetResource {
         Name = $Name
     }
 
-    if ($VMName -ne 'Management OS') {
+    if ($VMName -ne 'ManagementOS')
+    {
         $Arguments.Add('VMName',$VMName)
-    } else {
+    } 
+    else
+    {
         $Arguments.Add('ManagementOS', $true)
         $Arguments.Add('SwitchName', $SwitchName)
     }
@@ -62,7 +57,8 @@ Function Get-TargetResource {
     Write-Verbose $localizedData.GetVMNetAdapter
     $NetAdapter = Get-VMNetworkAdapter @Arguments -ErrorAction SilentlyContinue
 
-    if ($NetAdapter) {
+    if ($NetAdapter)
+    {
         Write-Verbose $localizedData.FoundVMNetAdapter
         $Configuration.Add('MacAddressSpoofing', $NetAdapter.MacAddressSpoofing)
         $Configuration.Add('DhcpGuard', $NetAdapter.DhcpGuard)
@@ -74,14 +70,17 @@ Function Get-TargetResource {
         $Configuration.Add('MinimumBandwidthAbsolute',$NetAdapter.BandwidthSetting.MinimumBandwidthAbsolute)
         $Configuration.Add('IeeePriorityTag',$NetAdapter.IeeePriorityTag)
         $Configuration.Add('PortMirroring',$NetAdapter.PortMirroringMode)
-    } else {
+    }
+    else
+    {
         Write-Warning $localizedData.NoVMNetAdapterFound
     }
 
-    $Configuration
+    return $configuration
 }
 
-Function Set-TargetResource {
+Function Set-TargetResource
+{
     [CmdletBinding()]
     Param (
         [Parameter(Mandatory)]
@@ -148,9 +147,12 @@ Function Set-TargetResource {
         Name = $Name
     }
 
-    if ($VMName -ne 'Management OS') {
+    if ($VMName -ne 'ManagementOS')
+    {
         $Arguments.Add('VMName',$VMName)
-    } else {
+    } 
+    else 
+    {
         $Arguments.Add('ManagementOS', $true)
         $Arguments.Add('SwitchName', $SwitchName)
     }
@@ -177,9 +179,10 @@ Function Set-TargetResource {
     Set-VMNetworkAdapter @SetArguments -ErrorAction Stop
 }
 
-Function Test-TargetResource {
-	[CmdletBinding()]
-	[OutputType([System.Boolean])]
+Function Test-TargetResource 
+{
+    [CmdletBinding()]
+    [OutputType([System.Boolean])]
     Param (
         [Parameter(Mandatory)]
         [String] $Id,
@@ -245,9 +248,12 @@ Function Test-TargetResource {
         Name = $Name
     }
 
-    if ($VMName -ne 'Management OS') {
+    if ($VMName -ne 'ManagementOS') 
+    {
         $Arguments.Add('VMName',$VMName)
-    } else {
+    } 
+    else 
+    {
         $Arguments.Add('ManagementOS', $true)
         $Arguments.Add('SwitchName', $SwitchName)
     }
@@ -255,7 +261,8 @@ Function Test-TargetResource {
     Write-Verbose $localizedData.GetVMNetAdapter
     $AdapterExists = Get-VMNetworkAdapter @Arguments -ErrorAction SilentlyContinue
     
-    if ($AdapterExists) {
+    if ($AdapterExists) 
+    {
         Write-Verbose $localizedData.FoundVMNetAdapter
         if ($AdapterExists.MacAddressSpoofing -eq $MacAddressSpoofing `
             -and $AdapterExists.RouterGuard -eq $RouterGuard `
@@ -268,14 +275,19 @@ Function Test-TargetResource {
             -and $AdapterExists.VMQWeight -eq $VMQWeight `
             -and $AdapterExists.PortMirroringMode -eq $PortMirroring `
             -and $AdapterExists.DeviceNaming -eq $DeviceNaming
-        ) {
+        ) 
+        {
             Write-Verbose $localizedData.VMNetAdapterExistsNoActionNeeded
             return $true
-        } else {
+        } 
+        else 
+        {
             Write-Verbose $localizedData.VMNetAdapterExistsWithDifferentConfiguration
             return $false
         }
-    } else {
+    } 
+    else 
+    {
         throw $localizedData.VMNetAdapterDoesNotExist
     }
 }
