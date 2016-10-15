@@ -35,41 +35,41 @@ Function Get-TargetResource
         Throw $localizedData.HyperVModuleNotFound
     }
 
-    $Configuration = @{
+    $configuration = @{
         Name = $Name
         SwitchName = $SwitchName
     }
 
-    $Arguments = @{
+    $arguments = @{
         Name = $Name
     }
 
     if ($VMName -ne 'ManagementOS')
     {
-        $Arguments.Add('VMName',$VMName)
+        $arguments.Add('VMName',$VMName)
     } 
     else
     {
-        $Arguments.Add('ManagementOS', $true)
-        $Arguments.Add('SwitchName', $SwitchName)
+        $arguments.Add('ManagementOS', $true)
+        $arguments.Add('SwitchName', $SwitchName)
     }
 
     Write-Verbose $localizedData.GetVMNetAdapter
-    $NetAdapter = Get-VMNetworkAdapter @Arguments -ErrorAction SilentlyContinue
+    $netAdapter = Get-VMNetworkAdapter @arguments -ErrorAction SilentlyContinue
 
-    if ($NetAdapter)
+    if ($netAdapter)
     {
         Write-Verbose $localizedData.FoundVMNetAdapter
-        $Configuration.Add('MacAddressSpoofing', $NetAdapter.MacAddressSpoofing)
-        $Configuration.Add('DhcpGuard', $NetAdapter.DhcpGuard)
-        $Configuration.Add('RouterGuard', $NetAdapter.RouterGuard)
-        $Configuration.Add('AllowTeaming', $NetAdapter.AllowTeaming)
-        $Configuration.Add('VmqWeight', $NetAdapter.VmqWeight)
-        $Configuration.Add('MaximumBandwidth',$NetAdapter.BandwidthSetting.MaximumBandwidth)
-        $Configuration.Add('MinimumBandwidthWeight',$NetAdapter.BandwidthSetting.MinimumBandwidthWeight)
-        $Configuration.Add('MinimumBandwidthAbsolute',$NetAdapter.BandwidthSetting.MinimumBandwidthAbsolute)
-        $Configuration.Add('IeeePriorityTag',$NetAdapter.IeeePriorityTag)
-        $Configuration.Add('PortMirroring',$NetAdapter.PortMirroringMode)
+        $configuration.Add('MacAddressSpoofing', $netAdapter.MacAddressSpoofing)
+        $configuration.Add('DhcpGuard', $netAdapter.DhcpGuard)
+        $configuration.Add('RouterGuard', $netAdapter.RouterGuard)
+        $configuration.Add('AllowTeaming', $netAdapter.AllowTeaming)
+        $configuration.Add('VmqWeight', $netAdapter.VmqWeight)
+        $configuration.Add('MaximumBandwidth',$netAdapter.BandwidthSetting.MaximumBandwidth)
+        $configuration.Add('MinimumBandwidthWeight',$netAdapter.BandwidthSetting.MinimumBandwidthWeight)
+        $configuration.Add('MinimumBandwidthAbsolute',$netAdapter.BandwidthSetting.MinimumBandwidthAbsolute)
+        $configuration.Add('IeeePriorityTag',$netAdapter.IeeePriorityTag)
+        $configuration.Add('PortMirroring',$netAdapter.PortMirroringMode)
     }
     else
     {
@@ -143,25 +143,25 @@ Function Set-TargetResource
         Throw $localizedData.HyperVModuleNotFound
     }
 
-    $Arguments = @{
+    $arguments = @{
         Name = $Name
     }
 
     if ($VMName -ne 'ManagementOS')
     {
-        $Arguments.Add('VMName',$VMName)
+        $arguments.Add('VMName',$VMName)
     } 
     else 
     {
-        $Arguments.Add('ManagementOS', $true)
-        $Arguments.Add('SwitchName', $SwitchName)
+        $arguments.Add('ManagementOS', $true)
+        $arguments.Add('SwitchName', $SwitchName)
     }
     
     Write-Verbose $localizedData.GetVMNetAdapter
-    $NetAdapter = Get-VMNetworkAdapter @Arguments -ErrorAction SilentlyContinue
+    $netAdapter = Get-VMNetworkAdapter @arguments -ErrorAction SilentlyContinue
 
-    $SetArguments = @{
-        VMNetworkAdapter = $NetAdapter
+    $setArguments = @{
+        VMNetworkAdapter = $netAdapter
         MacAddressSpoofing = $MacAddressSpoofing
         DhcpGuard = $DhcpGuard
         RouterGuard = $RouterGuard
@@ -176,7 +176,7 @@ Function Set-TargetResource
     }
     
     Write-Verbose $localizedData.PerformVMNetModify
-    Set-VMNetworkAdapter @SetArguments -ErrorAction Stop
+    Set-VMNetworkAdapter @setArguments -ErrorAction Stop
 }
 
 Function Test-TargetResource 
@@ -244,38 +244,38 @@ Function Test-TargetResource
         Throw $localizedData.HyperVModuleNotFound
     }
 
-    $Arguments = @{
+    $arguments = @{
         Name = $Name
     }
 
     if ($VMName -ne 'ManagementOS') 
     {
-        $Arguments.Add('VMName',$VMName)
+        $arguments.Add('VMName',$VMName)
     } 
     else 
     {
-        $Arguments.Add('ManagementOS', $true)
-        $Arguments.Add('SwitchName', $SwitchName)
+        $arguments.Add('ManagementOS', $true)
+        $arguments.Add('SwitchName', $SwitchName)
     }
     
     Write-Verbose $localizedData.GetVMNetAdapter
-    $AdapterExists = Get-VMNetworkAdapter @Arguments -ErrorAction SilentlyContinue
+    $adapterExists = Get-VMNetworkAdapter @arguments -ErrorAction SilentlyContinue
     
-    if ($AdapterExists) 
+    if ($adapterExists) 
     {
         Write-Verbose $localizedData.FoundVMNetAdapter
-        if ($AdapterExists.MacAddressSpoofing -eq $MacAddressSpoofing `
-            -and $AdapterExists.RouterGuard -eq $RouterGuard `
-            -and $AdapterExists.DhcpGuard -eq $DhcpGuard `
-            -and $AdapterExists.IeeePriorityTag -eq $IeeePriorityTag `
-            -and $AdapterExists.AllowTeaming -eq $AllowTeaming `
-            -and $AdapterExists.BandwidthSetting.MaximumBandwidth -eq $MaximumBandwidth `
-            -and $AdapterExists.BandwidthSetting.MinimumBandwidthWeight -eq $MinimumBandwidthWeight `
-            -and $AdapterExists.BandwidthSetting.MinimumBandwidthAbsolute -eq $MinimumBandwidthAbsolute `
-            -and $AdapterExists.VMQWeight -eq $VMQWeight `
-            -and $AdapterExists.PortMirroringMode -eq $PortMirroring `
-            -and $AdapterExists.DeviceNaming -eq $DeviceNaming
-        ) 
+        if ($adapterExists.MacAddressSpoofing -eq $MacAddressSpoofing `
+            -and $adapterExists.RouterGuard -eq $RouterGuard `
+            -and $adapterExists.DhcpGuard -eq $DhcpGuard `
+            -and $adapterExists.IeeePriorityTag -eq $IeeePriorityTag `
+            -and $adapterExists.AllowTeaming -eq $AllowTeaming `
+            -and $adapterExists.BandwidthSetting.MaximumBandwidth -eq $MaximumBandwidth `
+            -and $adapterExists.BandwidthSetting.MinimumBandwidthWeight -eq $MinimumBandwidthWeight `
+            -and $adapterExists.BandwidthSetting.MinimumBandwidthAbsolute -eq $MinimumBandwidthAbsolute `
+            -and $adapterExists.VMQWeight -eq $VMQWeight `
+            -and $adapterExists.PortMirroringMode -eq $PortMirroring `
+            -and $adapterExists.DeviceNaming -eq $DeviceNaming
+        )
         {
             Write-Verbose $localizedData.VMNetAdapterExistsNoActionNeeded
             return $true
@@ -291,3 +291,5 @@ Function Test-TargetResource
         throw $localizedData.VMNetAdapterDoesNotExist
     }
 }
+
+Export-ModuleMember -Function *-TargetResource

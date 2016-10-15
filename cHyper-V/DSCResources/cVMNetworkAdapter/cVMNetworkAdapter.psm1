@@ -42,16 +42,16 @@ Function Get-TargetResource
 
     if ($VMName -ne 'ManagementOS')
     {
-        $Arguments.Add('VMName',$VMName)
+        $arguments.Add('VMName',$VMName)
     }
     else
     {
-        $Arguments.Add('ManagementOS', $true)
-        $Arguments.Add('SwitchName', $SwitchName)
+        $arguments.Add('ManagementOS', $true)
+        $arguments.Add('SwitchName', $SwitchName)
     }
 
     Write-Verbose -Message $localizedData.GetVMNetAdapter
-    $netAdapter = Get-VMNetworkAdapter @Arguments -ErrorAction SilentlyContinue
+    $netAdapter = Get-VMNetworkAdapter @arguments -ErrorAction SilentlyContinue
 
     if ($netAdapter)
     {
@@ -302,3 +302,5 @@ Function Test-TargetResource
         }
     }
 }
+
+Export-ModuleMember -Function *-TargetResource
