@@ -1,13 +1,13 @@
 #region localizeddata
 if (Test-Path "${PSScriptRoot}\${PSUICulture}")
 {
-    Import-LocalizedData -BindingVariable LocalizedData -filename cVMSwitch.psd1 `
+    Import-LocalizedData -BindingVariable localizedData -filename cVMSwitch.psd1 `
                          -BaseDirectory "${PSScriptRoot}\${PSUICulture}"
 } 
 else
 {
     #fallback to en-US
-    Import-LocalizedData -BindingVariable LocalizedData -filename cVMSwitch.psd1 `
+    Import-LocalizedData -BindingVariable localizedData -filename cVMSwitch.psd1 `
                          -BaseDirectory "${PSScriptRoot}\en-US"
 }
 #endregion
@@ -48,9 +48,14 @@ function Get-TargetResource
             if ($switch.EmbeddedTeamingEnabled)
             {
                 Write-Verbose -Message $localizedData.FoundSetTeam
-                $netAdapters = $switch.NetAdapterInterfaceDescriptions | % { Get-NetAdapter -InterfaceDescription $_ | Select -ExpandProperty Name }
-                $netAdapterName = $netAdapters -join ','                
                 $switchTeam = Get-VMSwitchTeam -Name $Name
+
+                $netAdapterName = $(
+                    $switchTeam.NetAdapterInterfaceDescription | 
+                        Foreach-Object { 
+                            (Get-NetAdapter -InterfaceDescription $_).Name
+                        }
+                )               
                 $configuration.Add('TeamingMode',$switchTeam.TeamingMode)
                 $configuration.Add('LoadBalancingAlgorithm',$switchTeam.LoadBalancingAlgorithm)
             }
@@ -74,8 +79,8 @@ function Get-TargetResource
         $configuration.Add('EmbeddedTeamingEnabled',$switch.EmbeddedTeamingEnabled)
         $configuration.Add('AllowManagementOS',$switch.AllowManagementOS)
         $configuration.Add('Id',$switch.Id)
-        $configuration.Add('IovEnabled',$switch.IovEnabled)
-        $configuration.Add('PacketDirectEnabled',$switch.PacketDirectEnabled)
+        $configuration.Add('EnableIoV',$switch.IovEnabled)
+        $configuration.Add('EnablePacketDirect',$switch.PacketDirectEnabled)
         $configuration.Add('MinimumBandwidthMode',$switch.BandwidthReservationMode)
         $configuration.Add('Ensure','Present')
     }
@@ -233,7 +238,10 @@ function Set-TargetResource
                         Write-Verbose -Message $localizedData.SETFoundCheckNetAdapter
 
                         $switchTeam = Get-VMSwitchTeam -VMSwitch $switch
-                        $existngNetAdapters = $switchTeam.NetAdapterInterfaceDescription | % { Get-NetAdapter -InterfaceDescription $_ | Select -ExpandProperty Name }
+                        $existngNetAdapters = $switchTeam.NetAdapterInterfaceDescription | 
+                                ForEach-Object {
+                                    (Get-NetAdapter -InterfaceDescription $_).Name
+                                }
                         $switchTeamMembers = Compare-Object -ReferenceObject $NetAdapterName -DifferenceObject $existngNetAdapters
                     
                         $setTeamArguments = @{
@@ -498,8 +506,12 @@ function Test-TargetResource
                         {
                             #Compare network adapters in the SET
                             Write-Verbose -Message $localizedData.SETFoundCheckNetAdapter
-                            $existngNetAdapters = $switchTeam.NetAdapterInterfaceDescription | % { Get-NetAdapter -InterfaceDescription $_ | Select -ExpandProperty Name }
-                            $switchTeamMembers = Compare-Object -ReferenceObject $NetAdapterName -DifferenceObject $existngNetAdapters
+                            $existngNetAdapters = $switchTeam.NetAdapterInterfaceDescription | 
+                                ForEach-Object { 
+                                    (Get-NetAdapter -InterfaceDescription $_).Name 
+                                }
+                            $switchTeamMembers = Compare-Object -ReferenceObject $NetAdapterName `
+                                                 -DifferenceObject $existngNetAdapters
 
                             if ($switchTeamMembers -ne $null)
                             {

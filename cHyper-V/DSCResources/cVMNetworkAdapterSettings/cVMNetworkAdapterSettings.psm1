@@ -36,6 +36,7 @@ Function Get-TargetResource
     }
 
     $configuration = @{
+        Id = $Id
         Name = $Name
         SwitchName = $SwitchName
     }
@@ -70,6 +71,7 @@ Function Get-TargetResource
         $configuration.Add('MinimumBandwidthAbsolute',$netAdapter.BandwidthSetting.MinimumBandwidthAbsolute)
         $configuration.Add('IeeePriorityTag',$netAdapter.IeeePriorityTag)
         $configuration.Add('PortMirroring',$netAdapter.PortMirroringMode)
+        $configuration.Add('DeviceNaming',$netAdapter.DeviceNaming)
     }
     else
     {

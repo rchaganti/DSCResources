@@ -58,11 +58,12 @@ Function Get-TargetResource
         Write-Verbose $localizedData.FoundVMNetAdapter
         if ($VMName -eq 'ManagementOS')
         {
-            $configuration.Add('StaticMacAddress', $netAdapter.MacAddress)
+            $configuration.Add('MacAddress', $netAdapter.MacAddress)
+            $configuration.Add('DynamicMacAddress', $false)
         }
         elseif ($netAdapter.VMName)
         {
-            $configuration.Add('StaticMacAddress', $netAdapter.MacAddress)   
+            $configuration.Add('MacAddress', $netAdapter.MacAddress)   
             $configuration.Add('DynamicMacAddress', $netAdapter.DynamicMacAddressEnabled)
         }
         $configuration.Add('Ensure','Present')
