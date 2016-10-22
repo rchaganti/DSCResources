@@ -248,7 +248,7 @@ function Set-TargetResource
                             VMSwitch = $switch
                         }
 
-                        if ($switchTeamMembers -ne $null)
+                        if ($null -ne $switchTeamMembers)
                         {
                             #We have a difference in the compared objects
                             Write-Verbose -Message $localizedData.SETMembersDontMatch
@@ -513,7 +513,7 @@ function Test-TargetResource
                             $switchTeamMembers = Compare-Object -ReferenceObject $NetAdapterName `
                                                  -DifferenceObject $existngNetAdapters
 
-                            if ($switchTeamMembers -ne $null)
+                            if ($null -ne $switchTeamMembers)
                             {
                                 #We have a difference in the compared objects
                                 Write-Verbose -Message $localizedData.SETMembersDontMatch
