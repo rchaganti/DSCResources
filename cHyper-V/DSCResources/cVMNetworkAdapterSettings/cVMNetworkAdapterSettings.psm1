@@ -18,7 +18,7 @@ Function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     Param (
         [Parameter(Mandatory)]
-        [String] $Id,
+        [String] $Id, 
 
         [Parameter(Mandatory)]
         [String] $Name,
@@ -84,10 +84,10 @@ Function Get-TargetResource
 Function Set-TargetResource
 {
     [CmdletBinding()]
-    Param (
+    Param (    
         [Parameter(Mandatory)]
-        [String] $Id,
-        
+        [String] $Id, 
+
         [Parameter(Mandatory)]
         [String] $Name,
 
@@ -185,10 +185,10 @@ Function Test-TargetResource
 {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
-    Param (
+    Param (   
         [Parameter(Mandatory)]
-        [String] $Id,
-        
+        [String] $Id, 
+                     
         [Parameter(Mandatory)]
         [String] $Name,
 

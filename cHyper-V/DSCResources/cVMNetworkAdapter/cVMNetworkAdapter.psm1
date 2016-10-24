@@ -18,7 +18,7 @@ Function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     Param (
         [Parameter(Mandatory)]
-        [String] $Id,
+        [String] $Id, 
 
         [Parameter(Mandatory)]
         [String] $Name,        
@@ -31,6 +31,7 @@ Function Get-TargetResource
     )
 
     $configuration = @{
+        Id = $Id
         Name = $Name
         SwitchName = $SwitchName
         VMName = $VMName
@@ -82,8 +83,8 @@ Function Set-TargetResource
     [CmdletBinding()]
     Param (
         [Parameter(Mandatory)]
-        [String] $Id,
-        
+        [String] $Id, 
+
         [Parameter(Mandatory)]
         [String] $Name,
 
@@ -202,7 +203,7 @@ Function Test-TargetResource
     [OutputType([System.Boolean])]
     Param (
         [Parameter(Mandatory)]
-        [String] $Id,
+        [String] $Id, 
                 
         [Parameter(Mandatory)]
         [String] $Name,
