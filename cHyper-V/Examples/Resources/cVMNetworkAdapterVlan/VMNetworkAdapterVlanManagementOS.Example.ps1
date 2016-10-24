@@ -4,6 +4,7 @@
     Import-DscResource -ModuleName PSDesiredStateConfiguration
 
     cVMNetworkAdapterVlan HostOSAdapterVlan {
+        Id = 'Management-NIC'
         Name = 'Management-NIC'
         VMName = 'ManagementOS'
         AdapterMode = 'Access'

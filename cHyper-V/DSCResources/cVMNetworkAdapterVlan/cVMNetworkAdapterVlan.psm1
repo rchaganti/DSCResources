@@ -32,8 +32,13 @@ Function Get-TargetResource
         Throw $localizedData.HyperVModuleNotFound
     }
 
-    $arguments = @{
+    $configuration = @{
         Id = $Id
+        Name = $Name
+        VMName = $VMName
+    }
+    
+    $arguments = @{
         Name = $Name
     }
 
@@ -53,11 +58,6 @@ Function Get-TargetResource
         if ($adapterExists)
         {
             Write-Verbose $localizedData.FoundVMNetAdapter
-            $configuration = @{
-                'Name' = $Name
-                'VMName' = $VMName
-            }
-            #$Configuration.Remove('Name')
             $configuration.Add('AdapterMode',$adapterExists.VlanSetting.OperationMode)
             $configuration.Add('VlanId',$adapterExists.VlanSetting.AccessVlanId)
             $configuration.Add('NativeVlanId',$adapterExists.VlanSetting.NativeVlanId)
@@ -66,13 +66,13 @@ Function Get-TargetResource
             $configuration.Add('SecondaryVlanIdList',$adapterExists.VlanSetting.SecondaryVlanIdListString)
             $configuration.Add('AllowedVlanIdList',$adapterExists.VlanSetting.AllowedVlanIdListString)
         }
-        
-        return $configuration
     } 
     catch
     {
         Write-Error $_
     }
+
+    return $configuration
 }
 
 Function Set-TargetResource

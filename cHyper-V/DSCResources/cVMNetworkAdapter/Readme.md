@@ -3,7 +3,7 @@ This DSC resource can be used to attach network adapters to VM switches and add 
 
 ![](http://i.imgur.com/KVSWBo8.png)
 
-The *Id* property is the unique key within this DSC resource. This property isn't related to any VM network adapter configuration but instead used as a way to uniquely identify each VM network adapter resource in a configuration. *DO NOT USE A GUID AS AN ARGUMENT. ESPECIALLY, DYNAMICALLY GENERATED GUIDs*.
+The *Id* property is the unique key within this DSC resource. This property isn't related to any VM network adapter configuration but instead used as a way to uniquely identify each VM network adapter resource in a configuration. This property was introduced in an earlier version of this resource to ensure you can add netowrk adapter with the same name to different virtual machines. Make a note of that. **This won't still let you create two network adapters with the same name and attach them to same VM.** When configuring management OS or VM with multiple network adapters, you should still use unique name for each network adapter. *DO NOT USE A GUID AS AN ARGUMENT. ESPECIALLY, DYNAMICALLY GENERATED GUIDs*
 
 In the previous version of this DSC resource, *Name* property was the key property. Having *Name* as the key property prevented creating network adapters with the same name and attach them to different VMs. So, if you need to add a network adapter to the management OS, specify *VMName* as 'ManagementOS'. If the value of *VMName* property is not 'ManagementOS', it will be considered a Virtual Machine configuration and a network adapter will be added to VM on the Hyper-V host.
 
@@ -58,31 +58,31 @@ The following examples demonstrate how to use this resource module.
         Import-DscResource -ModuleName PSDesiredStateConfiguration
     
         cVMNetworkAdapter MyVM01NIC {
-    	    Id = 'MyVM01-NIC'
+            Id = 'MyVM01-NIC'
             Name = 'MyVM01-NIC'
     	    SwitchName = 'SETSwitch'
             VMName = 'MyVM01'
     	    Ensure = 'Present'
-        }
+       }
     
-        cVMNetworkAdapter MyVM02NIC {
-    	    Id = 'MyVM02-NIC'
-            Name = 'MyVM02-NIC'
-    	    SwitchName = 'SETSwitch'
-            VMName = 'MyVM02'
-    	    Ensure = 'Present'
-        }
+       cVMNetworkAdapter MyVM02NIC {
+           Id = 'MyVM02-NIC'
+           Name = 'NetAdapter'
+    	   SwitchName = 'SETSwitch'
+           VMName = 'MyVM02'
+    	   Ensure = 'Present'
+       }
     
-        #This resource configuration has the same Name for the VM adapter but the ID is unique.
-        cVMNetworkAdapter MyVM01NIC2 {
-    	    Id = 'MyVM02-NIC2'
-            Name = 'MyVM02-NIC'
-    	    SwitchName = 'SETSwitch'
-            VMName = 'MyVM02'
-    	    Ensure = 'Present'
-        }
+       #The following resource configuration shows that the different VMs can have network adapters with the same name. This is possible because Id is the key property and not Name.
+       cVMNetworkAdapter MyVM03NIC {
+           Id = 'MyVM03-NIC'
+           Name = 'NetAdapter'
+    	   SwitchName = 'SETSwitch'
+           VMName = 'MyVM03'
+    	   Ensure = 'Present'
+       }
     }
-
+    
 ##Create multiple management OS adapters with static MAC address on the Hyper-V host ##
     Configuration VMAdapter
     {
@@ -90,7 +90,7 @@ The following examples demonstrate how to use this resource module.
         Import-DscResource -ModuleName PSDesiredStateConfiguration
     
         cVMNetworkAdapter MyVM01NIC {
-    	    Id = 'MyVM01-NIC'
+            Id = 'MyVM01-NIC'
             Name = 'MyVM01-NIC'
     	    SwitchName = 'SETSwitch'
             MacAddress = '001523be0c'
@@ -99,20 +99,10 @@ The following examples demonstrate how to use this resource module.
         }
     
         cVMNetworkAdapter MyVM02NIC {
-    	    Id = 'MyVM02-NIC'
+            Id = 'MyVM02-NIC'
             Name = 'MyVM02-NIC'
     	    SwitchName = 'SETSwitch'
             MacAddress = '001523be0d'
-            VMName = 'MyVM02'
-    	    Ensure = 'Present'
-        }
-    
-        #This resource configuration has the same Name for the VM adapter but the ID is unique.
-        #This VM Adapter gets a dynamic MAC Address since the MacAddress property is missing.
-        cVMNetworkAdapter MyVM01NIC2 {
-    	    Id = 'MyVM02-NIC2'
-            Name = 'MyVM02-NIC'
-    	    SwitchName = 'SETSwitch'
             VMName = 'MyVM02'
     	    Ensure = 'Present'
         }

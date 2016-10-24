@@ -4,11 +4,11 @@
     Import-DscResource -ModuleName PSDesiredStateConfiguration
 
     cVMSwitch HostSwitch {
-    	Name = 'HostSwitch'
-    	Type = 'External'
-    	AllowManagementOS = $true
-    	MinimumBandwidthMode = 'Weight'
-    	NetAdapterName = 'HostTeam'
-    	Ensure = 'Present'
+        Name = 'HostSwitch'
+        Type = 'External'
+        AllowManagementOS = $true
+        MinimumBandwidthMode = 'Weight'
+        NetAdapterName = 'HostTeam'
+        Ensure = 'Present'
     }
 }

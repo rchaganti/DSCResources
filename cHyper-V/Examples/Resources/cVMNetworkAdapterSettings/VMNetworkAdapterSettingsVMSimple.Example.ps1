@@ -4,6 +4,7 @@
     Import-DscResource -ModuleName PSDesiredStateConfiguration
 
     cVMNetworkAdapterSettings VMAdapterSettings {
+        Id = 'Management-NIC'
         Name = 'Management-NIC'
         VMName = 'DHCPVM01'
         SwitchName = 'SETSwitch'

@@ -4,9 +4,10 @@
     Import-DscResource -ModuleName PSDesiredStateConfiguration
 
     cVMNetworkAdapter HostOSAdapter {
+        Id = 'Management-NIC'
         Name = 'Management-NIC'
-    	SwitchName = 'SETSwitch'
+        SwitchName = 'SETSwitch'
         VMName = 'ManagementOS'
-    	Ensure = 'Present'
+        Ensure = 'Present'
     }
 }

@@ -4,13 +4,13 @@
     Import-DscResource -ModuleName PSDesiredStateConfiguration
 
     cVMSwitch HostSwitch {
-    	Name = 'HostSwitch'
-    	Type = 'External'
-    	AllowManagementOS = $true
+        Name = 'HostSwitch'
+        Type = 'External'
+        AllowManagementOS = $true
         MinimumBandwidthMode = 'Weight'
         TeamingMode = 'SwitchIndependent'
         LoadBalancingAlgorithm = 'HyperVPort'
-    	NetAdapterName = 'NIC1','NIC2','NIC3','NIC4'
-    	Ensure = 'Present'
+        NetAdapterName = 'NIC1','NIC2','NIC3','NIC4'
+        Ensure = 'Present'
     }
 }

@@ -4,6 +4,7 @@
     Import-DscResource -ModuleName PSDesiredStateConfiguration
 
     cVMNetworkAdapterVlan VMMgmtAdapterVlan {
+        Id = 'VMManagement-NIC'
         Name = 'VMManagement-NIC'
         VMName = 'SQLVM01'
         AdapterMode = 'Access'
@@ -11,6 +12,7 @@
     }
 
     cVMNetworkAdapterVlan VMiSCSIAdapterVlan {
+        Id = 'VMiSCSI-NIC'
         Name = 'VMiSCSI-NIC'
         VMName = 'SQLVM01'
         AdapterMode = 'Untagged'

@@ -4,8 +4,8 @@
     Import-DscResource -ModuleName PSDesiredStateConfiguration
 
     cVMSwitch HostSwitch {
-    	Name = 'HostSwitch'
-    	Type = 'Private'
-    	Ensure = 'Present'
+        Name = 'HostSwitch'
+        Type = 'Private'
+        Ensure = 'Present'
     }
 }

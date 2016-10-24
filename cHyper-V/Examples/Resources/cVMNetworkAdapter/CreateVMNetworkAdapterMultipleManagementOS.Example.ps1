@@ -4,16 +4,18 @@
     Import-DscResource -ModuleName PSDesiredStateConfiguration
 
     cVMNetworkAdapter ManagementAdapter {
+        Id = 'Management-NIC'
         Name = 'Management-NIC'
-    	SwitchName = 'SETSwitch'
+        SwitchName = 'SETSwitch'
         VMName = 'ManagementOS'
-    	Ensure = 'Present'
+        Ensure = 'Present'
     }
 
     cVMNetworkAdapter ClusterAdapter {
+        Id = 'Cluster-NIC'
         Name = 'Cluster-NIC'
-    	SwitchName = 'SETSwitch'
+        SwitchName = 'SETSwitch'
         VMName = 'ManagementOS'
-    	Ensure = 'Present'
+        Ensure = 'Present'
     }
 }
