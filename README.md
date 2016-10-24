@@ -33,12 +33,12 @@ Custom DSC resource modules in this repository are packaged as different categor
 	- [cMARSEncryptionPhrase](https://github.com/rchaganti/DSCResources/tree/master/cMicrosoftAzureRecoveryServices/DSCResources/cMARSEncryptionPhrase) is used to configure the encryption settings for the MARS agent service.
 
 - Microsoft Hyper-V ([cHyper-V](https://github.com/rchaganti/DSCResources/tree/master/cHyper-V))
-	- [cVMSwitch](https://github.com/rchaganti/DSCResources/tree/master/cHyper-V/DSCResources/cVMSwitch) is used to create virtual machine switches.
-	- [cSwitchEmbeddedTeam](https://github.com/rchaganti/DSCResources/tree/master/cHyper-V/DSCResources/cSwitchEmbeddedTeam) is used to create switch embedded team VM switches on Server 2014 TP4 and above.
-	- [cNatSwitch](https://github.com/rchaganti/DSCResources/tree/master/cHyper-V/DSCResources/cNatSwitch) is used to deploy a VM switch of NAT type.
-	- [cVMNetworkAdapter](https://github.com/rchaganti/DSCResources/tree/master/cHyper-V/DSCResources/cVMNetworkAdapter) is used to create VM network adapters to attach to either management OS or the virtual machines.
-	- [cVMNetworkAdapterSettings](https://github.com/rchaganti/DSCResources/tree/master/cHyper-V/DSCResources/cVMNetworkAdapterSettings) is used to configure VM network adapter settings such as bandwidth weights, port mirroring, DHCP guard, MAC address spoofing, etc.
-	- [cVMNetworkAdapterVlan](https://github.com/rchaganti/DSCResources/tree/master/cHyper-V/DSCResources/cVMNetworkAdapterVlan) is used to configure VLANs on virtual network adapters either in the management OS or virtual machines.
+    - [cVMSwitch](https://github.com/rchaganti/DSCResources/tree/master/cHyper-V/DSCResources/cVMSwitch) is used to create virtual machine switches.
+    - [cVMNetworkAdapter](https://github.com/rchaganti/DSCResources/tree/master/cHyper-V/DSCResources/cVMNetworkAdapter) is used to create VM network adapters to attach to either management OS or the virtual machines.
+    - [cVMNetworkAdapterSettings](https://github.com/rchaganti/DSCResources/tree/master/cHyper-V/DSCResources/cVMNetworkAdapterSettings) is used to configure VM network adapter settings such as bandwidth weights, port mirroring, DHCP guard, MAC address spoofing, etc.
+    - [cVMNetworkAdapterVlan](https://github.com/rchaganti/DSCResources/tree/master/cHyper-V/DSCResources/cVMNetworkAdapterVlan) is used to configure VLANs on virtual network adapters either in the management OS or virtual machines.
+    - [cVMIPAddress](https://github.com/rchaganti/DSCResources/tree/master/cHyper-V/DSCResources/cVMIPAddress) is used to inject IP Address into a virtual machine running on Hyper-V host.
+    - [cWaitForVMGuestIntegration](https://github.com/rchaganti/DSCResources/tree/master/cHyper-V/DSCResources/cWaitForVMGuestIntegration) is used to ensure that the VM integration components are running. This will be useful when you want to wait until a VM completes reboot and then perform an action.
 
 - Microsoft Visual Studio Code ([cHyper-V](https://github.com/rchaganti/DSCResources/tree/master/vscode))
 	- [vscodesetup](https://github.com/rchaganti/DSCResources/tree/master/vscode/DSCResources/vscodesetup) is used to install Visual Studio Code.

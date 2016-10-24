@@ -2,7 +2,7 @@
 ### Custom DSC resource module for Microsoft Hyper-V Networking by [PowerShell Magazine](http://www.powershellmagazine.com "PowerShell Magazine"). ###
 ----------
 
-### This release (3.0) removed the cSwitchEmbededTeaming and cNATSwitch from this resource module. The functionality for creating SET team is now a part of cVMSwitch and cNatSwitch will go to xNetworking soon! ###
+### This release (3.0.0.0) removed the cSwitchEmbededTeaming and cNATSwitch from this resource module. The functionality for creating SET team is now a part of cVMSwitch and cNatSwitch will go to xNetworking soon! ###
 
 Microsoft Hyper-V DSC resource module contains a set of resources for managing Hyper-V management OS and guest networking.
 
