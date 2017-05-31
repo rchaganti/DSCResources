@@ -101,7 +101,7 @@ Function Set-TargetResource {
         Write-Verbose ($localizedData.MountingDiskImage -f $ImagePath)
         $DiskImage = Mount-DiskImage -ImagePath $ImagePath -NoDriveLetter -PassThru | Get-Volume
         Write-Verbose ($localizedData.MountedDiskImage -f $ImagePath)
-        $DiskVolume = Get-CimInstance -ClassName Win32_Volume | Where-Object { $_.DeviceID -eq $DiskImage.ObjectId }
+        $DiskVolume = Get-CimInstance -ClassName Win32_Volume | Where-Object { $_.DeviceID -eq $DiskImage.UniqueId }
 
         Write-Verbose ($localizedData.SetDriveLetetr -f $DriveLetter)
         Set-CimInstance -Property @{DriveLetter= $DriveLetter } -InputObject $DiskVolume
