@@ -4,8 +4,8 @@ ConvertFrom-StringData @'
     DiskImageNotMounted=Disk image at the path {0} is not mounted.
     MountingDiskImage=Mounting disk image at path {0}.
     MountedDiskImage=Disk image at path {0} is mounted.
-    SetDriveLetetr=Setting Drive letter of the mounted image to {0}.
-    DriverLetterSet=Drive letter of the mounted image set to {0}.
+    SetDriveLetter=Setting Drive letter of the mounted image to {0}.
+    DriveLetterSet=Drive letter of the mounted image set to {0}.
     DisMountingDiskImage=Dismounting disk image at path {0}.
     DismountedDiskImage=Disk image at path {0} is dismounted.
     MountExistsWithDriveLetter=Disk image mount exists with same drive letter as requested.

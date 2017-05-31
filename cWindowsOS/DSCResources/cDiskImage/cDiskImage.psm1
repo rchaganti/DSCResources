@@ -55,14 +55,14 @@ Function Get-TargetResource {
         DriveLetter = $DriveLetter
     }
 
-    Write-Verbose ($localizedData.GetDiskImage -f $ImagePath)
+    Write-Verbose -Message ($localizedData.GetDiskImage -f $ImagePath)
     $DiskImage = Get-DiskImage -ImagePath $ImagePath
     if ($DiskImage.Attached) {
         if (($DiskImage | Get-Volume).DriveLetter -eq $DriveLetter) {
-            Write-Verbose ($localizedData.DiskImageMounted -f $ImagePath)
+            Write-Verbose -Message ($localizedData.DiskImageMounted -f $ImagePath)
             $Configuration.Add('Ensure','Present')
         } else {
-            Write-Verbose ($localizedData.DiskImageNotMounted -f $ImagePath)
+            Write-Verbose -Message ($localizedData.DiskImageNotMounted -f $ImagePath)
             $Configuration.Add('Ensure','Absent')
         }
     }
@@ -98,18 +98,18 @@ Function Set-TargetResource {
     $DriveLetter = $DriveLetter + ':'
 
     if ($Ensure -eq 'Present') {
-        Write-Verbose ($localizedData.MountingDiskImage -f $ImagePath)
+        Write-Verbose -Message ($localizedData.MountingDiskImage -f $ImagePath)
         $DiskImage = Mount-DiskImage -ImagePath $ImagePath -NoDriveLetter -PassThru | Get-Volume
-        Write-Verbose ($localizedData.MountedDiskImage -f $ImagePath)
+        Write-Verbose -Message ($localizedData.MountedDiskImage -f $ImagePath)
         $DiskVolume = Get-CimInstance -ClassName Win32_Volume | Where-Object { $_.DeviceID -eq $DiskImage.ObjectId }
 
-        Write-Verbose ($localizedData.SetDriveLetetr -f $DriveLetter)
+        Write-Verbose -Message ($localizedData.SetDriveLetter -f $DriveLetter)
         Set-CimInstance -Property @{DriveLetter= $DriveLetter } -InputObject $DiskVolume
-        Write-Verbose ($localizedData.DriverLetterSet -f $DriveLetter)
+        Write-Verbose -Message ($localizedData.DriveLetterSet -f $DriveLetter)
     } else {
-        Write-Verbose ($localizedData.DisMountingDiskImage -f $DiskImage)
+        Write-Verbose -Message ($localizedData.DisMountingDiskImage -f $DiskImage)
         Dismount-DiskImage -ImagePath $ImagePath
-        Write-Verbose ($localizedData.DismountedDiskImage -f $DiskImage)
+        Write-Verbose -Message ($localizedData.DismountedDiskImage -f $DiskImage)
     }
 }
 
@@ -139,32 +139,32 @@ Function Test-TargetResource {
         [string] $Ensure = 'Present'
     )
 
-    Write-Verbose ($localizedData.GetDiskImage -f $ImagePath)
+    Write-Verbose -Message ($localizedData.GetDiskImage -f $ImagePath)
     $DiskImage = Get-DiskImage -ImagePath $ImagePath
     if ($DiskImage.Attached) {
         if (($DiskImage | Get-Volume).DriveLetter -eq $DriveLetter) {
-            Write-Verbose ($localizedData.MountExistsWithDriveLetter)
+            Write-Verbose -Message ($localizedData.MountExistsWithDriveLetter)
             $MountExists = $true
         } else {
-            Write-Verbose ($localizedData.MountExistsWithDifferentDriveLetter)
+            Write-Verbose -Message ($localizedData.MountExistsWithDifferentDriveLetter)
             $MountExists = $false
         }
     }
     
     if ($MountExists) {
         if ($Ensure -eq 'Present') {
-            Write-Verbose ($localizedData.MountExistsNoAction -f $ImagePath)
+            Write-Verbose -Message ($localizedData.MountExistsNoAction -f $ImagePath)
             $true
         } else {
-            Write-Verbose ($localizedData.MountDoesNotExistShouldCreate -f $ImagePath)
+            Write-Verbose -Message ($localizedData.MountDoesNotExistShouldCreate -f $ImagePath)
             $false
         }
     } else {
         if ($Ensure -eq 'Absent') {
-            Write-Verbose ($localizedData.MountExistsShouldRemove -f $ImagePath)
+            Write-Verbose -Message ($localizedData.MountExistsShouldRemove -f $ImagePath)
             $true
         } else {
-            Write-Verbose ($localizedData.MountDoesNotExistNoAction -f $ImagePath)
+            Write-Verbose -Message ($localizedData.MountDoesNotExistNoAction -f $ImagePath)
             $false
         }
     }
