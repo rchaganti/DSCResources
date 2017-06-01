@@ -30,6 +30,9 @@ Function Get-TargetResource {
     [OutputType([Hashtable])]
     param (
         [Parameter(Mandatory)]
+        [String] $Id,
+
+        [Parameter(Mandatory)]
         [ValidateScript(
             {
                 $extension = [System.IO.Path]::GetExtension($_)
@@ -51,6 +54,7 @@ Function Get-TargetResource {
     )
 
     $Configuration = @{
+        Id = $Id
         ImagePath = $ImagePath
         DriveLetter = $DriveLetter
     }
@@ -74,6 +78,9 @@ Function Get-TargetResource {
 Function Set-TargetResource {
     [CmdletBinding()]
     param (
+        [Parameter(Mandatory)]
+        [String] $Id,
+        
         [Parameter(Mandatory)]
         [ValidateScript(
             {
@@ -101,7 +108,7 @@ Function Set-TargetResource {
         Write-Verbose -Message ($localizedData.MountingDiskImage -f $ImagePath)
         $DiskImage = Mount-DiskImage -ImagePath $ImagePath -NoDriveLetter -PassThru | Get-Volume
         Write-Verbose -Message ($localizedData.MountedDiskImage -f $ImagePath)
-        $DiskVolume = Get-CimInstance -ClassName Win32_Volume | Where-Object { $_.DeviceID -eq $DiskImage.ObjectId }
+        $DiskVolume = Get-CimInstance -ClassName Win32_Volume | Where-Object { $_.DeviceID -eq $DiskImage.UniqueId }
 
         Write-Verbose -Message ($localizedData.SetDriveLetter -f $DriveLetter)
         Set-CimInstance -Property @{DriveLetter= $DriveLetter } -InputObject $DiskVolume
@@ -117,6 +124,9 @@ Function Test-TargetResource {
     [CmdletBinding()]
     [OutputType([Boolean])]
     param (
+        [Parameter(Mandatory)]
+        [String] $Id,
+        
         [Parameter(Mandatory)]
         [ValidateScript(
             {

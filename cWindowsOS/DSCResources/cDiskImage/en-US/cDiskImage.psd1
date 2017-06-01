@@ -9,7 +9,7 @@ ConvertFrom-StringData @'
     DisMountingDiskImage=Dismounting disk image at path {0}.
     DismountedDiskImage=Disk image at path {0} is dismounted.
     MountExistsWithDriveLetter=Disk image mount exists with same drive letter as requested.
-    MountExistsWithDifferenDriveLetter=Disk image mount exists with different drive letter than requested.
+    MountExistsWithDifferentDriveLetter=Disk image mount exists with different drive letter than requested.
     MountExistsNoAction=Disk image mount for {0} already exists. No action needed.
     MountDoesNotExistShouldCreate=Disk image mount for {0} does not exist. It will be mounted.
     MountExistsShouldRemove=Disk image mount for {0} exists. It will be dismounted.

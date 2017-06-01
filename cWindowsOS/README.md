@@ -21,9 +21,10 @@ The *cDiskImage* resource can be used to mount or dismount ISO images on the tar
 
 ![](http://i.imgur.com/p7dpa0B.png)
 
-When using this resource, both the *DriveLetter* and the *ImagePath* (ISO) must be specified. If the ISO image is already mounted with a different drive letter, this resource modifies it to the drive letter specified in the configuration script.
+When using this resource, both the *DriveLetter* and the *ImagePath* (ISO) must be specified. If the ISO image is already mounted with a different drive letter, this resource modifies it to the drive letter specified in the configuration script. The Id property is a unique key that is need to differentiate between resource instances where Ensure is set to Present or Absent. Without this you will not be able to mount and dismount the image in the same configuration. 
 
     cDiskImage DiskImageDemo {
+        Id = 'ImageR2-Mount'
         ImagePath = 'C:\Software\WS12R2.ISO'
         DriveLetter = 'F'
         Ensure = 'Present'
