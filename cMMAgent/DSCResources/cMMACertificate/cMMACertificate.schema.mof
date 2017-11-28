@@ -1,0 +1,10 @@
+
+[ClassVersion("1.0.0.0"), FriendlyName("cMMACertificate")]
+class cMMACertificate : OMI_BaseResource
+{
+    [Key] string CertificateThumbprint;
+    [Write] bool RestartService;
+    [Read] string SubjectName;
+    [Read] string SerialNumber;
+};
+

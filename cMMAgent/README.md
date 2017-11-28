@@ -11,6 +11,7 @@ Microsoft Monitoring Agent (MMA) is used to connect target systems to System Cen
 - [cMMAgentOpInsights](https://github.com/rchaganti/DSCResources/tree/master/cMMAgent/DSCResources/cMMAgentOpInsights) is used to enable or disable Azure Operational Insights within the Microsoft Monitoring Agent. This can also be used to update the WorkspaceID and WorkspaceKey for connecting to Azure Operational Insights.
 - [cMMAgentAD](https://github.com/rchaganti/DSCResources/tree/master/cMMAgent/DSCResources/cMMAgentAD) is used to enable or disable Active Directory integration for the Microsoft Management Agent. By enabling AD integration, you can assign agent-managed computers to management groups.
 - [cMMAgentManagementGroups](https://github.com/rchaganti/DSCResources/tree/master/cMMAgent/DSCResources/cMMAgentManagementGroups) DSC resource can be used to add or remove management groups. You can use this resource to update the action account credentials for the management agent service.
+- [cMMAgentCertificate](https://github.com/rchaganti/DSCResources/tree/master/cMMAgent/DSCResources/cMMAgentCertificate) DSC resource can be used to add or update certificate used for authentication with SCOM Management server.
 
 I could have combined the resources into just a couple of them but that increases the complexity of the resource module. Therefore, I decided to go much granular and divide these into multiple resources. For example, the [cMMAgentProxyCredential](https://github.com/rchaganti/DSCResources/tree/master/cMMAgent/DSCResources/cMMAgentProxyCredential) resource lets you not just add or remove credentials but also update the credentials, if required.
 
@@ -235,4 +236,14 @@ Once you add a management group, if you need to update the action account creden
              Force = $true
           }
        }
+    }
+
+####Using cMMAgentCertificate resource####
+The [cMMAgentCertificate](https://github.com/rchaganti/DSCResources/tree/master/cMMAgent/DSCResources/cMMAgentCertificate) DSC resource can be used to add or update certificate used for authentication with SCOM Management server.
+
+There is only one key property that is *CertificateThumbprint*. This is a string property. Setting this to the thumbprint of a certificate installed in the computers personal certificate store will be set it. Setting RestartService to True will mean HealthService is restarted when certificate is updated.
+
+    cMMAgentCertificate MMAgentAD {
+        CertificateThumbprint = $thumbprint
+        RestartService = $true
     }
