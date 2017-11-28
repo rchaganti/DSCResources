@@ -1,0 +1,10 @@
+
+[ClassVersion("1.0.0.0"), FriendlyName("cMMAgentHSLockdown")]
+class cMMAgentHSLockdown : OMI_BaseResource
+{
+    [Key, Description("Determines whether entry should exist or not"), ValueMap{"Add","Remove"}, Values{"Add","Remove"}] String Action;
+    [Write] String Allowed[];
+    [Write] String Denied[];
+    [Write] bool RestartService;
+};
+
