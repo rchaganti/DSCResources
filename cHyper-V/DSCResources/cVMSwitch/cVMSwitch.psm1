@@ -40,6 +40,8 @@ function Get-TargetResource
     if ($switch)
     {
         Write-Verbose -Message $localizedData.FoundSwitch
+        $teamingMode = 'none'
+        $loadBalancingAlgorithm = 'none'
         if ($switch.SwitchType -eq 'External')
         {
             Write-Verbose -Message $localizedData.FoundExternalSwitch
@@ -56,8 +58,8 @@ function Get-TargetResource
                             (Get-NetAdapter -InterfaceDescription $_).Name
                         }
                 )               
-                $configuration.Add('TeamingMode',$switchTeam.TeamingMode)
-                $configuration.Add('LoadBalancingAlgorithm',$switchTeam.LoadBalancingAlgorithm)
+                $teamingMode = $switchTeam.TeamingMode
+                $loadBalancingAlgorithm = $switchTeam.LoadBalancingAlgorithm
             }
             else
             {
@@ -78,6 +80,8 @@ function Get-TargetResource
         $configuration.Add('NetAdapterName', $netAdapterName)
         $configuration.Add('NetAdapterInterfaceDescription',$switch.NetAdapterInterfaceDescriptions)
         $configuration.Add('EmbeddedTeamingEnabled',$switch.EmbeddedTeamingEnabled)
+        $configuration.Add('TeamingMode',$teamingMode)
+        $configuration.Add('LoadBalancingAlgorithm',$loadBalancingAlgorithm)
         $configuration.Add('AllowManagementOS',$switch.AllowManagementOS)
         $configuration.Add('Id',$switch.Id)
         $configuration.Add('EnableIoV',$switch.IovEnabled)
