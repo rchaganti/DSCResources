@@ -50,8 +50,8 @@ function Get-TargetResource
                 Write-Verbose -Message $localizedData.FoundSetTeam
                 $switchTeam = Get-VMSwitchTeam -Name $Name
 
-                $netAdapterName = $(
-                    $switchTeam.NetAdapterInterfaceDescription | 
+                $netAdapterName = @(
+                    $switchTeam.NetAdapterInterfaceDescriptions | 
                         Foreach-Object { 
                             (Get-NetAdapter -InterfaceDescription $_).Name
                         }
@@ -61,7 +61,7 @@ function Get-TargetResource
             }
             else
             {
-                $netAdapterName = $( 
+                $netAdapterName = @( 
                     if($switch.NetAdapterInterfaceDescription)
                     {
                         (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescription).Name
@@ -72,6 +72,7 @@ function Get-TargetResource
         else
         {
             Write-Verbose -Message ($localizedData.FoundIntORPvtSwitch -f $switch.SwitchType)
+            $netAdapterName = @()
         }
         
         $configuration.Add('NetAdapterName', $netAdapterName)
