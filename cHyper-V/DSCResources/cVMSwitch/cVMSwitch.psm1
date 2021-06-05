@@ -58,8 +58,8 @@ function Get-TargetResource
                             (Get-NetAdapter -InterfaceDescription $_).Name
                         }
                 )               
-                $teamingMode = $switchTeam.TeamingMode
-                $loadBalancingAlgorithm = $switchTeam.LoadBalancingAlgorithm
+                $teamingMode = "$($switchTeam.TeamingMode)"
+                $loadBalancingAlgorithm = "$($switchTeam.LoadBalancingAlgorithm)"
             }
             else
             {
@@ -86,7 +86,7 @@ function Get-TargetResource
         $configuration.Add('Id',$switch.Id)
         $configuration.Add('EnableIoV',$switch.IovEnabled)
         $configuration.Add('EnablePacketDirect',$switch.PacketDirectEnabled)
-        $configuration.Add('MinimumBandwidthMode',$switch.BandwidthReservationMode)
+        $configuration.Add('MinimumBandwidthMode',"$($switch.BandwidthReservationMode)")
         $configuration.Add('Ensure','Present')
     }
     else
