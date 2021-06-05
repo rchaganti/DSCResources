@@ -78,7 +78,7 @@ function Get-TargetResource
         }
         
         $configuration.Add('NetAdapterName', $netAdapterName)
-        $configuration.Add('NetAdapterInterfaceDescription',$switch.NetAdapterInterfaceDescriptions)
+        $configuration.Add('NetAdapterInterfaceDescription',$switch.NetAdapterInterfaceDescription)
         $configuration.Add('EmbeddedTeamingEnabled',$switch.EmbeddedTeamingEnabled)
         $configuration.Add('TeamingMode',$teamingMode)
         $configuration.Add('LoadBalancingAlgorithm',$loadBalancingAlgorithm)
