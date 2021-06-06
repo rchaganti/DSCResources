@@ -40,6 +40,8 @@ function Get-TargetResource
     if ($switch)
     {
         Write-Verbose -Message $localizedData.FoundSwitch
+        $teamingMode = 'none'
+        $loadBalancingAlgorithm = 'none'
         if ($switch.SwitchType -eq 'External')
         {
             Write-Verbose -Message $localizedData.FoundExternalSwitch
@@ -50,18 +52,18 @@ function Get-TargetResource
                 Write-Verbose -Message $localizedData.FoundSetTeam
                 $switchTeam = Get-VMSwitchTeam -Name $Name
 
-                $netAdapterName = $(
-                    $switchTeam.NetAdapterInterfaceDescription | 
+                $netAdapterName = @(
+                    $switchTeam.NetAdapterInterfaceDescriptions | 
                         Foreach-Object { 
                             (Get-NetAdapter -InterfaceDescription $_).Name
                         }
                 )               
-                $configuration.Add('TeamingMode',$switchTeam.TeamingMode)
-                $configuration.Add('LoadBalancingAlgorithm',$switchTeam.LoadBalancingAlgorithm)
+                $teamingMode = "$($switchTeam.TeamingMode)"
+                $loadBalancingAlgorithm = "$($switchTeam.LoadBalancingAlgorithm)"
             }
             else
             {
-                $netAdapterName = $( 
+                $netAdapterName = @( 
                     if($switch.NetAdapterInterfaceDescription)
                     {
                         (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescription).Name
@@ -72,16 +74,19 @@ function Get-TargetResource
         else
         {
             Write-Verbose -Message ($localizedData.FoundIntORPvtSwitch -f $switch.SwitchType)
+            $netAdapterName = @()
         }
         
         $configuration.Add('NetAdapterName', $netAdapterName)
-        $configuration.Add('NetAdapterInterfaceDescription',$switch.NetAdapterInterfaceDescriptions)
+        $configuration.Add('NetAdapterInterfaceDescription',$switch.NetAdapterInterfaceDescription)
         $configuration.Add('EmbeddedTeamingEnabled',$switch.EmbeddedTeamingEnabled)
+        $configuration.Add('TeamingMode',$teamingMode)
+        $configuration.Add('LoadBalancingAlgorithm',$loadBalancingAlgorithm)
         $configuration.Add('AllowManagementOS',$switch.AllowManagementOS)
         $configuration.Add('Id',$switch.Id)
         $configuration.Add('EnableIoV',$switch.IovEnabled)
         $configuration.Add('EnablePacketDirect',$switch.PacketDirectEnabled)
-        $configuration.Add('MinimumBandwidthMode',$switch.BandwidthReservationMode)
+        $configuration.Add('MinimumBandwidthMode',"$($switch.BandwidthReservationMode)")
         $configuration.Add('Ensure','Present')
     }
     else
