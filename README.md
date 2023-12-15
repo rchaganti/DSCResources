@@ -42,7 +42,7 @@ Custom DSC resource modules in this repository are packaged as different categor
 
 - Microsoft Visual Studio Code ([cHyper-V](https://github.com/rchaganti/DSCResources/tree/master/vscode))
 	- [vscodesetup](https://github.com/rchaganti/DSCResources/tree/master/vscode/DSCResources/vscodesetup) is used to install Visual Studio Code.
-	- [vscodeextension](https://github.com/rchaganti/DSCResources/tree/master/vscode/DSCResources/vscodeextension) is used to install VS code extensions from the marketplace.
+	- [vscodeextension](https://github.com/rchaganti/DSCResources/tree/master/vscode/DSCResources/vscodextension) is used to install VS code extensions from the marketplace.
 
 These modules are available on [PowerShellGallery.com](https://www.powershellgallery.com). If you are using Windows PowerShell 5.0 or Packagemanagement module on PowerShell 4.0, you can install these modules using PowerShellGet module.
 
